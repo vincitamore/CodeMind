@@ -1,13 +1,13 @@
-# CodeMind - The N² Cognitive IDE
+# CodeMind - The N2 Cognitive IDE
 
 > **The first code editor with a hierarchical cognitive architecture that thinks like a developer**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Status: Active Development](https://img.shields.io/badge/Status-Active%20Development-blue.svg)]()
 
-## 🧠 What is CodeMind?
+## What is CodeMind?
 
-CodeMind is a revolutionary AI-powered IDE built on a VSCode fork that uses **hierarchical multi-agent cognition** to understand and improve your code. Unlike traditional AI code assistants that use a single LLM, CodeMind employs six specialized cognitive agents that analyze your code from different perspectives, then synthesize their insights through a meta-cognitive layer with built-in **N² self-correction**.
+CodeMind is a revolutionary AI-powered IDE built on a VSCode fork that uses **hierarchical multi-agent cognition** to understand and improve your code. Unlike traditional AI code assistants that use a single LLM, CodeMind employs six specialized cognitive agents that analyze your code from different perspectives, then synthesize their insights through a meta-cognitive layer with built-in **N2 self-correction**.
 
 ### The Problem We Solve
 
@@ -20,13 +20,13 @@ Current AI code editors (Cursor, Copilot, etc.) suffer from:
 
 CodeMind solves this through its unique cognitive architecture.
 
-## 🎯 Core Innovation: Hierarchical Cognitive Architecture
+## Core Innovation: Hierarchical Cognitive Architecture
 
 ### Three-Layer Intelligence System
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                   Meta-Cognitive Layer (N²)                  │
+│                   Meta-Cognitive Layer (N2)                  │
 │              Self-evaluation and quality control             │
 │  • Scores output quality (0-10)                             │
 │  • Triggers refinement if score < 9                          │
@@ -35,7 +35,7 @@ CodeMind solves this through its unique cognitive architecture.
                          │
 ┌────────────────────────┴────────────────────────────────────┐
 │                    Synthesis Layer (Central)                 │
-│           ODAI Cycle: Observe → Distill → Adapt → Integrate │
+│           ODAI Cycle: Observe -> Distill -> Adapt -> Integrate │
 │  • Combines multiple agent perspectives                      │
 │  • Resolves conflicts and contradictions                     │
 │  • Produces unified implementation                           │
@@ -44,8 +44,8 @@ CodeMind solves this through its unique cognitive architecture.
 ┌────────────────────────┴────────────────────────────────────┐
 │              Specialist Agent Layer (Six Agents)             │
 │                                                               │
-│  🎨 Architect    🔧 Engineer    🔒 Security                  │
-│  ⚡ Performance  🧪 Testing     📚 Documentation             │
+│  Architect    Engineer    Security                           │
+│  Performance  Testing     Documentation                      │
 │                                                               │
 │  Each agent analyzes code from their specialized lens        │
 └───────────────────────────────────────────────────────────────┘
@@ -55,22 +55,22 @@ CodeMind solves this through its unique cognitive architecture.
 
 | Agent | Focus | What They Check |
 |-------|-------|-----------------|
-| **🎨 Architect** | Design & Structure | Clean architecture, SOLID principles, design patterns, maintainability |
-| **🔧 Engineer** | Implementation | Correctness, edge cases, error handling, best practices |
-| **🔒 Security** | Safety & Privacy | Vulnerabilities, injection risks, data exposure, auth issues |
-| **⚡ Performance** | Optimization | Complexity, memory usage, bottlenecks, scaling concerns |
-| **🧪 Testing** | Quality Assurance | Testability, test coverage, test cases, QA considerations |
-| **📚 Documentation** | Clarity & Communication | Code clarity, naming, comments, documentation needs |
+| **Architect** | Design & Structure | Clean architecture, SOLID principles, design patterns, maintainability |
+| **Engineer** | Implementation | Correctness, edge cases, error handling, best practices |
+| **Security** | Safety & Privacy | Vulnerabilities, injection risks, data exposure, auth issues |
+| **Performance** | Optimization | Complexity, memory usage, bottlenecks, scaling concerns |
+| **Testing** | Quality Assurance | Testability, test coverage, test cases, QA considerations |
+| **Documentation** | Clarity & Communication | Code clarity, naming, comments, documentation needs |
 
-### N² Self-Correction Loop
+### N2 Self-Correction Loop
 
 The system assigns quality scores to its own outputs:
-- **Score ≥9**: Accept and present to user
+- **Score >=9**: Accept and present to user
 - **Score <9**: Issue repair directive and regenerate (up to 4 iterations)
 
 This creates **near-zero hallucination rates** and ensures consistent quality.
 
-## ✨ Key Features
+## Key Features
 
 ### Code Intelligence
 - **Multi-perspective analysis** - Six specialized agents review every code change
@@ -97,7 +97,7 @@ This creates **near-zero hallucination rates** and ensures consistent quality.
 - **Terminal integration** - AI can suggest and run terminal commands
 - **Git integration** - AI-assisted commit messages, PR descriptions
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 # Clone repository
@@ -127,20 +127,20 @@ npm run start
 }
 ```
 
-## 📊 Performance Benchmarks
+## Target Performance Metrics
 
-| Metric | CodeMind | Cursor | Copilot |
-|--------|----------|--------|---------|
-| Code Quality Score | 9.2/10 | 7.8/10 | 7.5/10 |
-| Bug Detection Rate | 94% | 78% | 72% |
-| Security Vulnerability Detection | 96% | 68% | 45% |
-| False Positive Rate | 3% | 12% | 18% |
-| Hallucination Rate | <2% | ~8% | ~12% |
-| Response Time (P95) | 4.2s | 3.8s | 2.1s |
+| Metric | CodeMind Target |
+|--------|----------|
+| Code Quality Score | 9.2/10 |
+| Bug Detection Rate | 94% |
+| Security Vulnerability Detection | 96% |
+| False Positive Rate | 3% |
+| Hallucination Rate | <2% |
+| Response Time (P95) | 4.2s |
 
-*Benchmarks run on [standard test suite], averaged over 1000 code generation tasks*
+*Metrics based on internal testing goals*
 
-## 🎓 How It Works
+## How It Works
 
 ### 1. You Make a Request
 ```
@@ -149,12 +149,12 @@ User: "Add error handling to this function"
 
 ### 2. Six Agents Analyze in Parallel
 ```
-🎨 Architect:  Wrap in try-catch, add error types
-🔧 Engineer:   Validate inputs, handle edge cases  
-🔒 Security:   Sanitize error messages, no data leaks
-⚡ Performance: Avoid expensive error tracking in hot path
-🧪 Testing:    Add test cases for error scenarios
-📚 Documentation: Document error types and recovery
+Architect:  Wrap in try-catch, add error types
+Engineer:   Validate inputs, handle edge cases  
+Security:   Sanitize error messages, no data leaks
+Performance: Avoid expensive error tracking in hot path
+Testing:    Add test cases for error scenarios
+Documentation: Document error types and recovery
 ```
 
 ### 3. Central Synthesizer Combines Insights
@@ -166,11 +166,11 @@ Synthesis Layer:
 • Assigns quality score: 8.7/10
 ```
 
-### 4. N² Loop Triggers Refinement (Score <9)
+### 4. N2 Loop Triggers Refinement (Score <9)
 ```
 Repair Directive: "Add input validation, improve error types"
-→ Agents re-analyze with directive
-→ New synthesis: 9.4/10 ✓ Accept
+-> Agents re-analyze with directive
+-> New synthesis: 9.4/10 Accept
 ```
 
 ### 5. Present to User with Diff View
@@ -191,7 +191,7 @@ function processData(data) {
 }
 ```
 
-## 🏗️ Architecture
+## Architecture
 
 ### Technology Stack
 - **Base**: VSCode fork (TypeScript, Electron)
@@ -214,13 +214,13 @@ codemind/
 │   ├── performance/
 │   ├── testing/
 │   ├── documentation/
-│   └── orchestrator/       # Synthesis & N² loop
+│   └── orchestrator/       # Synthesis & N2 loop
 ├── providers/              # LLM provider adapters
 ├── indexer/                # Code intelligence
 └── ui/                     # Custom UI components
 ```
 
-## 🎯 Use Cases
+## Use Cases
 
 ### Code Generation
 Ask for complex features and get production-ready code that's been reviewed by six specialists.
@@ -240,13 +240,13 @@ Automatic generation of clear, comprehensive documentation based on code analysi
 ### Learning
 Understand *why* code is written a certain way through multi-perspective explanations.
 
-## 🔮 Roadmap
+## Roadmap
 
 ### Phase 1: Foundation (Months 1-2)
-- ✅ VSCode fork setup
-- ✅ Basic agent framework
-- ✅ ODAI synthesis cycle
-- ✅ N² self-correction loop
+- VSCode fork setup
+- Basic agent framework
+- ODAI synthesis cycle
+- N2 self-correction loop
 - [ ] OpenAI integration
 - [ ] Inline editing (Ctrl+K)
 
@@ -271,7 +271,7 @@ Understand *why* code is written a certain way through multi-perspective explana
 - [ ] Collaboration features
 - [ ] Public beta
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
 
@@ -290,17 +290,17 @@ npm run watch
 npm test
 ```
 
-## 📄 License
+## License
 
 MIT License - see [LICENSE](./LICENSE) for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Built on [Visual Studio Code](https://github.com/microsoft/vscode)
 - Inspired by cognitive psychology and hierarchical processing theories
-- Agent architecture adapted from MainE1 N² Overmind research
+- Agent architecture adapted from advanced hierarchical multi-agent research
 
-## 📞 Community
+## Community
 
 - **Documentation**: [docs.codemind.dev](https://docs.codemind.dev)
 - **Discord**: [discord.gg/codemind](https://discord.gg/codemind)
@@ -309,6 +309,6 @@ MIT License - see [LICENSE](./LICENSE) for details.
 
 ---
 
-**Built with 🧠 for developers who care about code quality**
+**Built with for developers who care about code quality**
 
 *"True code intelligence emerges not from a single AI, but from the synthesis of many specialized perspectives, continuously refined through self-correction."*

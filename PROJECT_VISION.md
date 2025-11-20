@@ -8,17 +8,17 @@
 
 ---
 
-## 🎯 The Big Vision
+## The Big Vision
 
 **CodeMind will become the premier AI-powered IDE by being the first to implement true multi-perspective cognitive reasoning in code development.**
 
 We're not building another AI code assistant. We're building a **cognitive partner** that thinks about code the way senior developers do - considering multiple perspectives simultaneously, validating its own output, and iterating toward excellence.
 
-## 🧠 The Core Insight: Psychological Alpha
+## The Core Insight: Psychological Alpha
 
-### What We Learned from MainE1
+### What We Learned from Research
 
-The original MainE1 research proved that **hierarchical multi-agent cognition with self-correction** produces:
+Advanced hierarchical multi-agent research has shown that **hierarchical multi-agent cognition with self-correction** produces:
 - 5-10x lower hallucination rates
 - Consistently higher quality outputs
 - More nuanced, multi-faceted analysis
@@ -36,7 +36,7 @@ Software development is inherently multi-dimensional:
 
 **A single AI model cannot excel at all of these simultaneously.** But six specialized agents, each expert in their domain, synthesized by a meta-cognitive layer - that can match (and exceed) senior developer judgment.
 
-## 🎨 The Philosophy
+## The Philosophy
 
 ### 1. Intelligence Through Specialization
 
@@ -45,20 +45,20 @@ Just as a development team benefits from diverse expertise (frontend, backend, s
 ```
 Senior Architect: "This violates the single responsibility principle"
 Security Expert:  "That's a SQL injection vulnerability"  
-Performance Lead: "This is O(n²), we need O(n log n)"
+Performance Lead: "This is O(n^2), we need O(n log n)"
 QA Engineer:      "Where are the error test cases?"
 ```
 
 Each perspective is essential. None is sufficient alone.
 
-### 2. Self-Awareness Through N² Reflection
+### 2. Self-Awareness Through N2 Reflection
 
-The best developers review their own code critically before committing. Our N² loop embodies this:
+The best developers review their own code critically before committing. Our N2 loop embodies this:
 
 ```
 1. Generate solution
 2. Self-assess: "Is this good enough?" (score 0-10)
-3. If no → Identify specific weaknesses
+3. If no -> Identify specific weaknesses
 4. Regenerate with improvements
 5. Repeat until quality threshold met
 ```
@@ -86,13 +86,13 @@ Users should:
 
 No AI jargon in the main interface. No exposed "agent names." Just great code with optional depth.
 
-## 🎯 What Makes Us Different
+## What Makes Us Different
 
 ### vs. GitHub Copilot
 | Copilot | CodeMind |
 |---------|----------|
 | Single model (GPT-4) | Six specialized agents + synthesis |
-| No quality verification | N² self-correction loop |
+| No quality verification | N2 self-correction loop |
 | Black box | Transparent reasoning (optional) |
 | Cloud only | Local-first option |
 | Suggestion-focused | Full code understanding |
@@ -106,15 +106,7 @@ No AI jargon in the main interface. No exposed "agent names." Just great code wi
 | Faster (less thorough) | More thorough (optimized) |
 | One perspective | Six perspectives synthesized |
 
-### vs. Antigravity (Google)
-| Antigravity | CodeMind |
-|-------------|----------|
-| Cloud-native | Local-first capable |
-| Closed source | Open source core |
-| Single corporate model | Multi-provider support |
-| Unknown architecture | Proven cognitive architecture |
-
-## 🚀 Market Opportunity
+## Market Opportunity
 
 ### Target Segments
 
@@ -140,12 +132,12 @@ No AI jargon in the main interface. No exposed "agent names." Just great code wi
 **Target Market Share** (Year 3): 2% = 200,000 users
 
 **Revenue Potential**:
-- Individual: 150,000 users × $40/mo = $6M/mo
-- Teams: 3,000 teams × $1000/mo = $3M/mo
-- Enterprise: 50 orgs × $25k/mo = $1.25M/mo
+- Individual: 150,000 users x $40/mo = $6M/mo
+- Teams: 3,000 teams x $1000/mo = $3M/mo
+- Enterprise: 50 orgs x $25k/mo = $1.25M/mo
 **Total ARR Target**: ~$125M by Year 3
 
-## 🎯 Success Metrics
+## Success Metrics
 
 ### Technical Excellence
 - **Hallucination rate**: <2% (vs. 10-15% industry average)
@@ -161,12 +153,12 @@ No AI jargon in the main interface. No exposed "agent names." Just great code wi
 - **NPS score**: >60
 
 ### Business Viability
-- **Paid conversion**: >15% (beta → paid)
+- **Paid conversion**: >15% (beta -> paid)
 - **MRR growth**: 25%+ month-over-month
 - **Churn rate**: <5% monthly
 - **CAC payback**: <6 months
 
-## 🏗️ Strategic Principles
+## Strategic Principles
 
 ### 1. Open Core Model
 - **Core IDE**: Open source (MIT license)
@@ -203,7 +195,7 @@ No AI jargon in the main interface. No exposed "agent names." Just great code wi
 
 **Why**: Our differentiator is thoroughness, not latency
 
-## 🎭 User Personas
+## User Personas
 
 ### Persona 1: Senior Developer Sam
 **Background**: 10 years experience, tech lead at Series B startup
@@ -241,7 +233,7 @@ No AI jargon in the main interface. No exposed "agent names." Just great code wi
 **Pain**: AI generates "correct but slow" code
 **CodeMind Value**: Performance agent optimizes before deployment
 
-## 🛣️ Go-to-Market Strategy
+## Go-to-Market Strategy
 
 ### Phase 1: Private Alpha (Months 1-2)
 - **Audience**: 50 hand-picked developers
@@ -249,7 +241,7 @@ No AI jargon in the main interface. No exposed "agent names." Just great code wi
 - **Metrics**: Usability, bug reports, feature requests
 
 ### Phase 2: Public Beta (Months 3-4)
-- **Audience**: Waitlist → 10,000 developers
+- **Audience**: Waitlist -> 10,000 developers
 - **Goal**: Scale testing, gather testimonials
 - **Metrics**: Engagement, retention, satisfaction
 - **Pricing**: Free during beta
@@ -271,20 +263,20 @@ No AI jargon in the main interface. No exposed "agent names." Just great code wi
   - Word of mouth
 - **Goal**: 50,000 active users, $100k+ MRR
 
-## 🎓 Educational Mission
+## Educational Mission
 
 We believe AI should **teach**, not just **do**. Every CodeMind suggestion includes:
 
 **"Why We Chose This" (optional toggle)**:
 ```
-🎨 Architect: "Used Strategy pattern for flexibility"
-🔒 Security: "Parameterized queries prevent SQL injection"  
-⚡ Performance: "Binary search reduces complexity from O(n) to O(log n)"
+Architect: "Used Strategy pattern for flexibility"
+Security: "Parameterized queries prevent SQL injection"  
+Performance: "Binary search reduces complexity from O(n) to O(log n)"
 ```
 
 Developers don't just get code - they get mentorship from six senior specialists.
 
-## 🌍 Long-Term Vision (3-5 Years)
+## Long-Term Vision (3-5 Years)
 
 ### Year 1: Establish Foothold
 - 50,000 active users
@@ -309,27 +301,27 @@ Developers don't just get code - they get mentorship from six senior specialists
 - Developer education platform
 - Acquisition potential or sustained independence
 
-## 🎪 Why Now?
+## Why Now?
 
 **Technology Convergence**:
-- ✅ LLMs are capable enough (GPT-4, Claude 3.5)
-- ✅ Local models are viable (Llama 3, Mistral)
-- ✅ Vector embeddings enable semantic code search
-- ✅ Tree-sitter provides fast, accurate parsing
+- LLMs are capable enough (GPT-4, Claude 3.5)
+- Local models are viable (Llama 3, Mistral)
+- Vector embeddings enable semantic code search
+- Tree-sitter provides fast, accurate parsing
 
 **Market Timing**:
-- ✅ Developers now expect AI assistance
-- ✅ Current tools showing limitations (hallucinations, quality issues)
-- ✅ Willingness to pay for quality
-- ✅ Enterprise security concerns create opening for local-first
+- Developers now expect AI assistance
+- Current tools showing limitations (hallucinations, quality issues)
+- Willingness to pay for quality
+- Enterprise security concerns create opening for local-first
 
 **Team Capability**:
-- ✅ Proven cognitive architecture (MainE1 research)
-- ✅ TypeScript expertise
-- ✅ Understanding of VSCode internals
-- ✅ AI/ML engineering experience
+- Proven cognitive architecture (Research-backed)
+- TypeScript expertise
+- Understanding of VSCode internals
+- AI/ML engineering experience
 
-## 🎯 What Success Looks Like
+## What Success Looks Like
 
 **In 6 months**: 
 "CodeMind consistently produces better code than Cursor, even if it takes a few seconds longer"
@@ -345,7 +337,7 @@ Developers don't just get code - they get mentorship from six senior specialists
 
 ---
 
-## 🚀 Next Steps
+## Next Steps
 
 1. **Validate architecture** - Build minimal prototype proving multi-agent synthesis works for code
 2. **Fork VSCode** - Set up development environment and build pipeline

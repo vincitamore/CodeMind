@@ -26,10 +26,10 @@
 
 **Implementation**:
 ```
-✓ Three distinct layers: Specialists → Synthesis → Quality Control
-✓ Clear information flow: bottom-up analysis, top-down refinement
-✓ No agent-to-agent communication (prevents chaos)
-✗ Avoid: Flat voting mechanisms, agent debates, circular dependencies
+- Three distinct layers: Specialists -> Synthesis -> Quality Control
+- Clear information flow: bottom-up analysis, top-down refinement
+- No agent-to-agent communication (prevents chaos)
+- Avoid: Flat voting mechanisms, agent debates, circular dependencies
 ```
 
 **Example**:
@@ -41,30 +41,18 @@ const final = await qualityCheck(synthesis);       // Layer 3: Validation
 
 // BAD: Flat
 const consensus = await agentsVote(code);          // Voting is not intelligence
-```
-
----
-
-### 2. Self-Correction is Mandatory
-
-**Principle**: Quality assurance must be intrinsic to the generation process, not an afterthought.
-
-**Why**:
-- Post-hoc validation is too late (damage done)
-- External review doesn't understand the reasoning process
-- Best developers self-review before committing
 
 **Implementation**:
 ```
 ✓ Every output gets a quality score (0-10)
 ✓ Threshold enforcement (score ≥ 9 or refine)
-✓ Up to 4 N² iterations for refinement
+- Up to 4 N2 iterations for refinement
 ✓ Repair directives are specific and actionable
 ✗ Avoid: Accepting first output, skipping validation, vague feedback
 ```
 
 **Measurement**:
-- Track N² trigger rate (target: 20-30%)
+- Track N2 trigger rate (target: 20-30%)
 - Monitor quality score distribution (target: 85%+ above 9.0)
 - Measure hallucination rate (target: <2%)
 
@@ -89,12 +77,12 @@ const consensus = await agentsVote(code);          // Voting is not intelligence
 
 **The Six Domains**:
 ```
-🎨 Architecture:    Long-term design, maintainability, patterns
-🔧 Engineering:     Correctness, edge cases, robustness
-🔒 Security:        Vulnerabilities, data protection, threat mitigation
-⚡ Performance:     Optimization, scalability, efficiency
-🧪 Testing:         Testability, test coverage, QA
-📚 Documentation:   Clarity, understandability, maintainability
+Architecture:    Long-term design, maintainability, patterns
+Engineering:     Correctness, edge cases, robustness
+Security:        Vulnerabilities, data protection, threat mitigation
+Performance:     Optimization, scalability, efficiency
+Testing:         Testability, test coverage, QA
+Documentation:   Clarity, understandability, maintainability
 ```
 
 **Non-Negotiable**: These six perspectives are foundational. Adding more is possible, removing any is not.
@@ -219,20 +207,20 @@ Default View:
 Debug Mode (toggle):
 - All agent analyses
 - Quality scores per iteration
-- N² loop history
+- N2 loop history
 - Repair directives
 - Timing breakdown
 
 Never Show:
 - Agent names in main interface ("Security Agent says...")
 - Internal scores in default view
-- Process terminology (ODAI, N², etc.)
+- Process terminology (ODAI, N2, etc.)
 ```
 
 **UI Example**:
 ```
 ┌─────────────────────────────────────────┐
-│ Generated: Added error handling         │ [ⓘ Show Details]
+│ Generated: Added error handling         │ [i Show Details]
 │                                         │
 │  + try {                                │
 │  +   const result = await fetchData(); │
@@ -245,7 +233,7 @@ Never Show:
 │ [Accept] [Reject] [Modify]             │
 └─────────────────────────────────────────┘
 
-[Click ⓘ]
+[Click i]
 
 ┌─────────────────────────────────────────┐
 │ Analysis Details                        │
@@ -368,12 +356,12 @@ DON'T sacrifice quality:
 ```
 Inline Edit (Ctrl+K):
 - First response: <4s
-- With N² refinement: <8s
+- With N2 refinement: <8s
 - Progressive: Show after 2s (partial), update when complete
 
 Autocomplete (Tab):
 - Latency: <200ms (must be instant)
-- Strategy: Single fast agent, no N² loop
+- Strategy: Single fast agent, no N2 loop
 
 Code Review:
 - Full analysis: <6s
@@ -503,7 +491,7 @@ const providerWithFallback = new FallbackProvider([
 ```
 ✓ Agent system (our unique architecture)
 ✓ ODAI synthesis layer
-✓ N² self-correction loop
+✓ N2 self-correction loop
 ✓ Code intelligence layer (symbol indexing, embeddings)
 ✓ LLM provider abstraction
 ✓ Custom UI for agent visualization
@@ -608,8 +596,8 @@ Never show "500 error" to user. Always degrade gracefully.
 What We Track:
 - Request types and frequency
 - Agent execution times
-- Quality scores (pre and post N²)
-- N² trigger rate
+- Quality scores (pre and post N2)
+- N2 trigger rate
 - Error rates by component
 - Cache hit rates
 - User satisfaction (accept/reject rates)
@@ -637,7 +625,7 @@ What We DON'T Track (Privacy):
 
 ## Anti-Patterns to Avoid
 
-### ❌ 1. The God Agent
+### 1. The God Agent
 ```typescript
 // BAD: One agent tries to do everything
 class GodAgent {
@@ -655,7 +643,7 @@ const analyses = await Promise.all([
 ]);
 ```
 
-### ❌ 2. Premature Optimization
+### 2. Premature Optimization
 ```typescript
 // BAD: Optimize before measuring
 async function optimized() {
@@ -676,7 +664,7 @@ async function measured() {
 }
 ```
 
-### ❌ 3. Hardcoded Prompts
+### 3. Hardcoded Prompts
 ```typescript
 // BAD: Prompts in code
 const prompt = "You are a security expert. Analyze this code...";
@@ -691,7 +679,7 @@ const prompt = buildPrompt({
 });
 ```
 
-### ❌ 4. Ignoring Context
+### 4. Ignoring Context
 ```typescript
 // BAD: Analyze code in isolation
 async function analyze(code: string) {
@@ -713,7 +701,7 @@ async function analyze(code: string, context: CodeContext) {
 }
 ```
 
-### ❌ 5. Black Box Reasoning
+### 5. Black Box Reasoning
 ```typescript
 // BAD: No visibility
 async function generate(code: string) {
@@ -755,7 +743,7 @@ Performance:
 - P50 latency: <3s
 - P95 latency: <6s
 - P99 latency: <10s
-- N² overhead: <2x base latency
+- N2 overhead: <2x base latency
 
 Reliability:
 - Uptime: >99.9%

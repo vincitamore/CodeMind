@@ -205,7 +205,7 @@ npm install --save-dev \
           "default": 9.0,
           "minimum": 0,
           "maximum": 10,
-          "description": "Quality threshold for N² loop"
+          "description": "Quality threshold for N2 loop"
         }
       }
     }
@@ -301,16 +301,16 @@ cd ../..
 ```
 
 **Success Criteria**:
-- ✅ VSCode builds and runs
-- ✅ Extension activates on startup
-- ✅ Ctrl+K triggers command
-- ✅ Message shows selected text length
+- VSCode builds and runs
+- Extension activates on startup
+- Ctrl+K triggers command
+- Message shows selected text length
 
 ---
 
 ## Phase 2: Basic Agent System
 
-**Goal**: Implement the core agent architecture (6 agents + synthesis + N² loop)
+**Goal**: Implement the core agent architecture (6 agents + synthesis + N2 loop)
 
 **Duration**: Weeks 2-4
 
@@ -723,7 +723,7 @@ Return JSON:
 }
 ```
 
-### Step 2.6: Implement N² Loop Controller
+### Step 2.6: Implement N2 Loop Controller
 
 **Create** `extensions/codemind-agent/src/synthesis/n2-controller.ts`:
 ```typescript
@@ -757,7 +757,7 @@ export class N2Controller {
     let currentRepairDirective: any;
     
     for (let i = 0; i < this.maxIterations; i++) {
-      console.log(`N² Iteration ${i + 1}/${this.maxIterations}`);
+      console.log(`N2 Iteration ${i + 1}/${this.maxIterations}`);
       
       // Execute all agents in parallel
       const analyses = await Promise.all(
@@ -849,7 +849,7 @@ export function activate(context: vscode.ExtensionContext) {
     maxTokens: 500
   });
   
-  // Create synthesizer and N² controller
+  // Create synthesizer and N2 controller
   const synthesizer = new ODAISynthesizer(llmProvider, 9.0);
   const n2Controller = new N2Controller(4, 9.0);
   
@@ -886,7 +886,7 @@ export function activate(context: vscode.ExtensionContext) {
           selection: selectedText
         };
         
-        // Execute N² loop
+        // Execute N2 loop
         const result = await n2Controller.execute(
           instruction,
           agents,
@@ -945,11 +945,11 @@ function fetchData(url) {
 ```
 
 **Success Criteria**:
-- ✅ All 6 agents analyze in parallel
-- ✅ Synthesis combines perspectives
-- ✅ N² loop triggers if quality <9
-- ✅ Final code is generated
-- ✅ Code is inserted into editor
+- All 6 agents analyze in parallel
+- Synthesis combines perspectives
+- N2 loop triggers if quality <9
+- Final code is generated
+- Code is inserted into editor
 
 ---
 
@@ -1235,7 +1235,7 @@ export function activate(context: vscode.ExtensionContext) {
           editor.selection
         );
         
-        // Execute N² loop with context
+        // Execute N2 loop with context
         const result = await n2Controller.execute(
           instruction,
           agents,
@@ -1380,12 +1380,12 @@ export class AnalysisPanel {
   
   private getHtmlContent(analyses: AgentAnalysis[], qualityScore: number): string {
     const agentEmojis: Record<string, string> = {
-      architect: '🎨',
-      engineer: '🔧',
-      security: '🔒',
-      performance: '⚡',
-      testing: '🧪',
-      documentation: '📚'
+      architect: '',
+      engineer: '',
+      security: '',
+      performance: '',
+      testing: '',
+      documentation: ''
     };
     
     const qualityColor = qualityScore >= 9 ? 'green' : qualityScore >= 7 ? 'orange' : 'red';
@@ -1624,7 +1624,7 @@ function sumArray(arr) {
 }
 
 Instruction: "Optimize this code"
-Expected: Identifies O(n²) complexity, suggests O(n) solution
+Expected: Identifies O(n^2) complexity, suggests O(n) solution
 ```
 
 ### Step 5.3: Performance Benchmarking
@@ -1660,8 +1660,8 @@ async function benchmarkAgentExecution() {
 Target Metrics:
 - Agent execution (parallel): <3s
 - Synthesis: <1s
-- Full N² loop (1 iteration): <5s
-- Full N² loop (2 iterations): <10s
+- Full N2 loop (1 iteration): <5s
+- Full N2 loop (2 iterations): <10s
 
 If not meeting targets:
 1. Check LLM provider latency
@@ -1763,13 +1763,13 @@ See [ROADMAP.md](./ROADMAP.md) for detailed timeline and milestones.
 
 ---
 
-**Congratulations!** You now have a complete guide to building CodeMind from scratch. The implementation preserves the psychological alpha (hierarchical agents, ODAI synthesis, N² self-correction) while creating a practical, usable IDE.
+**Congratulations!** You now have a complete guide to building CodeMind from scratch. The implementation preserves the psychological alpha (hierarchical agents, ODAI synthesis, N2 self-correction) while creating a practical, usable IDE.
 
 **Key Success Factors**:
-- ✅ Start with MVP (basic agent system)
-- ✅ Test early and often
-- ✅ Get user feedback quickly
-- ✅ Iterate based on real usage
-- ✅ Don't skip the quality control (N² loop)
+- Start with MVP (basic agent system)
+- Test early and often
+- Get user feedback quickly
+- Iterate based on real usage
+- Don't skip the quality control (N2 loop)
 
 **Remember**: The goal is not to be the fastest AI code assistant. The goal is to be the most **reliable** and **thorough** AI code assistant that thinks like a senior development team.

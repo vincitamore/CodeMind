@@ -2,23 +2,23 @@
 
 Thank you for your interest in contributing to CodeMind! This document provides guidelines for contributing to the project.
 
-## 🎯 Project Vision
+## Project Vision
 
 CodeMind is building the world's first IDE with true hierarchical cognitive architecture. Our goal is not to be the fastest AI code assistant, but the most **reliable** and **thorough** - thinking like a senior development team.
 
-## 🧠 Core Principles
+## Core Principles
 
 Before contributing, please understand our non-negotiable core principles:
 
-1. **Hierarchical Architecture** - Three layers (Specialists → Synthesis → Quality Control)
-2. **N² Self-Correction** - Quality threshold must be enforced
+1. **Hierarchical Architecture** - Three layers (Specialists -> Synthesis -> Quality Control)
+2. **N2 Self-Correction** - Quality threshold must be enforced
 3. **Six Cognitive Perspectives** - Architecture, Engineering, Security, Performance, Testing, Documentation
-4. **ODAI Synthesis** - Observe → Distill → Adapt → Integrate
+4. **ODAI Synthesis** - Observe -> Distill -> Adapt -> Integrate
 5. **Local-First** - Must work 100% offline with local models
 
 **Never compromise these principles for convenience or speed.**
 
-## 🤝 Ways to Contribute
+## Ways to Contribute
 
 ### 1. Code Contributions
 
@@ -73,7 +73,7 @@ Before contributing, please understand our non-negotiable core principles:
 - Create templates
 - Share use cases
 
-## 📋 Development Setup
+## Development Setup
 
 See [IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md) for detailed setup instructions.
 
@@ -93,7 +93,7 @@ npm run watch
 ./scripts/code.sh
 ```
 
-## 🔧 Code Standards
+## Code Standards
 
 ### TypeScript Style
 
@@ -138,7 +138,7 @@ async function analyze(c, ctx) {
 **Example**:
 ```typescript
 /**
- * Executes N² self-correction loop until quality threshold met
+ * Executes N2 self-correction loop until quality threshold met
  * 
  * Runs agent analysis iteratively, synthesizing results and checking
  * quality. If quality score < threshold, generates repair directive
@@ -172,7 +172,7 @@ async execute(
 ): Promise<N2Result>
 ```
 
-## 🧪 Testing Requirements
+## Testing Requirements
 
 **All code contributions must include tests.**
 
@@ -208,7 +208,7 @@ suite('Security Agent Tests', () => {
 
 Test full workflows end-to-end:
 ```typescript
-test('Full N² loop produces quality code', async () => {
+test('Full N2 loop produces quality code', async () => {
   const result = await n2Controller.execute(
     'Add error handling',
     agents,
@@ -237,7 +237,7 @@ test('Parallel agent execution completes quickly', async () => {
 });
 ```
 
-## 📝 Pull Request Process
+## Pull Request Process
 
 ### 1. Before Submitting
 
@@ -306,7 +306,7 @@ Closes #123
 3. **Feedback Addressed** (make requested changes)
 4. **Final Approval** and merge
 
-## 🐛 Bug Reports
+## Bug Reports
 
 **Use this template**:
 
@@ -341,7 +341,7 @@ What actually happens
 Any other relevant information
 ```
 
-## 💡 Feature Requests
+## Feature Requests
 
 **Use this template**:
 
@@ -362,7 +362,7 @@ What other approaches did you consider?
 Mockups, examples, etc.
 ```
 
-## 🏗️ Architecture Decisions
+## Architecture Decisions
 
 For significant architectural changes:
 
@@ -391,7 +391,7 @@ What are the trade-offs?
 What else did we think about?
 ```
 
-## 🎨 Design Contributions
+## Design Contributions
 
 UI/UX improvements are welcome!
 
@@ -402,7 +402,7 @@ UI/UX improvements are welcome!
 - Test on multiple screen sizes
 - Include mockups in PR
 
-## 🌍 Internationalization
+## Internationalization
 
 We welcome translations!
 
@@ -413,7 +413,7 @@ We welcome translations!
 4. Test in your language
 5. Submit PR
 
-## 📜 Code of Conduct
+## Code of Conduct
 
 ### Our Standards
 
@@ -440,14 +440,14 @@ Violations may result in:
 
 Report violations to: conduct@codemind.dev
 
-## 📞 Communication Channels
+## Communication Channels
 
 - **GitHub Issues**: Bug reports, feature requests
 - **GitHub Discussions**: Questions, ideas, general discussion
 - **Discord**: Real-time chat, community support
 - **Twitter**: Announcements, updates
 
-## 🙏 Recognition
+## Recognition
 
 Contributors are recognized in:
 - README.md (Contributors section)
@@ -459,7 +459,7 @@ Contributors are recognized in:
 - Beta testing
 - Community events
 
-## 📚 Resources
+## Resources
 
 - [Architecture Documentation](./ARCHITECTURE.md)
 - [Agent System Details](./AGENT_SYSTEM.md)
@@ -467,7 +467,7 @@ Contributors are recognized in:
 - [Implementation Guide](./IMPLEMENTATION_GUIDE.md)
 - [Development Roadmap](./ROADMAP.md)
 
-## ❓ Questions?
+## Questions?
 
 - Read the docs first
 - Search existing issues
@@ -476,6 +476,6 @@ Contributors are recognized in:
 
 ---
 
-**Thank you for contributing to CodeMind! Together we're building the future of AI-powered coding.** 🚀
+**Thank you for contributing to CodeMind! Together we're building the future of AI-powered coding.**
 
 *By contributing, you agree that your contributions will be licensed under the MIT License.*

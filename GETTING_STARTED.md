@@ -6,7 +6,7 @@
 
 ---
 
-## 📖 What is CodeMind?
+## What is CodeMind?
 
 **CodeMind is an AI-powered IDE that thinks like a senior development team.**
 
@@ -21,7 +21,7 @@ Your Code
    ↓
 [Synthesis Layer combines perspectives]
    ↓
-[Quality Control (N²) verifies output]
+[Quality Control (N2) verifies output]
    ↓
 Production-Ready Code
 ```
@@ -30,22 +30,22 @@ Production-Ready Code
 
 ---
 
-## 🎯 The Six Agents
+## The Six Agents
 
 | Agent | Focus | What They Check |
 |-------|-------|-----------------|
-| 🎨 **Architect** | Design & Structure | SOLID principles, patterns, maintainability |
-| 🔧 **Engineer** | Implementation | Correctness, edge cases, error handling |
-| 🔒 **Security** | Safety & Privacy | Vulnerabilities, injection, data exposure |
-| ⚡ **Performance** | Optimization | Complexity, memory, bottlenecks |
-| 🧪 **Testing** | Quality Assurance | Testability, coverage, test cases |
-| 📚 **Documentation** | Clarity | Code clarity, naming, documentation |
+| **Architect** | Design & Structure | SOLID principles, patterns, maintainability |
+| **Engineer** | Implementation | Correctness, edge cases, error handling |
+| **Security** | Safety & Privacy | Vulnerabilities, injection, data exposure |
+| **Performance** | Optimization | Complexity, memory, bottlenecks |
+| **Testing** | Quality Assurance | Testability, coverage, test cases |
+| **Documentation** | Clarity | Code clarity, naming, documentation |
 
 Each agent specializes in their domain. Together, they provide comprehensive code review.
 
 ---
 
-## 🔄 How It Works
+## How It Works
 
 ### Example: Adding Error Handling
 
@@ -53,21 +53,21 @@ Each agent specializes in their domain. Together, they provide comprehensive cod
 2. **Types instruction**: "Add error handling"
 3. **Six agents analyze** (parallel, <3 seconds):
    ```
-   🎨 Architect:  Use try-catch pattern, create error types
-   🔧 Engineer:   Validate inputs, handle all failure modes
-   🔒 Security:   Don't expose sensitive data in errors
-   ⚡ Performance: Avoid expensive error tracking in hot path
-   🧪 Testing:    Add test cases for error scenarios
-   📚 Documentation: Document error types clearly
+   Architect:  Use try-catch pattern, create error types
+   Engineer:   Validate inputs, handle all failure modes
+   Security:   Don't expose sensitive data in errors
+   Performance: Avoid expensive error tracking in hot path
+   Testing:    Add test cases for error scenarios
+   Documentation: Document error types clearly
    ```
 4. **Synthesis layer** combines insights (ODAI cycle):
    - **O**bserve: What does each agent see?
    - **D**istill: What's the core requirement?
    - **A**dapt: Quality score <9? Generate repair directive
-   - **I**ntegrate: Quality score ≥9? Generate final code
-5. **N² loop** ensures quality:
-   - If quality score <9/10 → Refine (up to 4 iterations)
-   - If quality score ≥9/10 → Present to user
+   - **I**ntegrate: Quality score >=9? Generate final code
+5. **N2 loop** ensures quality:
+   - If quality score <9/10 -> Refine (up to 4 iterations)
+   - If quality score >=9/10 -> Present to user
 6. **User reviews** diff and accepts/rejects
 
 ### Why This Matters
@@ -90,13 +90,13 @@ Each agent specializes in their domain. Together, they provide comprehensive cod
 
 ---
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 ### Three Layers
 
 ```
 ┌─────────────────────────────────────────┐
-│     Meta-Cognitive Layer (N²)           │
+│     Meta-Cognitive Layer (N2)           │
 │  "Is this good enough?" (0-10 score)    │
 └─────────────────┬───────────────────────┘
                   │
@@ -116,10 +116,10 @@ Each agent specializes in their domain. Together, they provide comprehensive cod
 CodeMind is a **fork of VSCode**, not a separate application.
 
 **Why fork VSCode?**
-- ✅ Proven editor (100M+ users)
-- ✅ Huge ecosystem (extensions, themes)
-- ✅ Developer familiarity
-- ✅ Focus our effort on AI, not editing
+- Proven editor (100M+ users)
+- Huge ecosystem (extensions, themes)
+- Developer familiarity
+- Focus our effort on AI, not editing
 
 **What we add**:
 - Agent system
@@ -129,7 +129,7 @@ CodeMind is a **fork of VSCode**, not a separate application.
 
 ---
 
-## 🚀 Quick Start (5 minutes)
+## Quick Start (5 minutes)
 
 ### 1. Clone Repository
 
@@ -180,7 +180,7 @@ npm run watch
 
 ---
 
-## 📚 Documentation Structure
+## Documentation Structure
 
 **Start Here**:
 1. [README.md](./README.md) - Project overview
@@ -201,7 +201,7 @@ npm run watch
 
 ---
 
-## 🎓 Key Concepts
+## Key Concepts
 
 ### ODAI Synthesis Cycle
 
@@ -222,28 +222,28 @@ The "brain" that combines agent perspectives:
    - Route feedback to agents
    - Trigger re-analysis
 
-4. **I**ntegrate: "What's the solution?" (if quality ≥9)
+4. **I**ntegrate: "What's the solution?" (if quality >=9)
    - Generate final code
    - Explain key decisions
    - Present to user
 
-### N² Self-Correction Loop
+### N2 Self-Correction Loop
 
 The "quality control" that ensures excellence:
 
 ```
-Generate → Score → Quality ≥9?
+Generate -> Score -> Quality >=9?
                       ↓ No
-                   Refine → Score → Quality ≥9?
+                   Refine -> Score -> Quality >=9?
                                       ↓ No
-                                   Refine → Score → Quality ≥9?
+                                   Refine -> Score -> Quality >=9?
                                                       ↓ Yes
-                                                   Accept ✓
+                                                   Accept
 ```
 
-**Why "N²"?**
+**Why "N2"?**
 - N = First-order reasoning (agents analyze code)
-- N² = Second-order reasoning (system evaluates its own analysis)
+- N2 = Second-order reasoning (system evaluates its own analysis)
 
 This is like a senior developer reviewing their own code before committing.
 
@@ -265,14 +265,14 @@ Each agent outputs **exactly 4 structured insights**:
 
 ---
 
-## 🎯 What Makes CodeMind Different
+## What Makes CodeMind Different
 
 ### vs. GitHub Copilot
 
 | Feature | Copilot | CodeMind |
 |---------|---------|----------|
 | Architecture | Single model | Six specialized agents |
-| Quality Control | None | N² self-correction |
+| Quality Control | None | N2 self-correction |
 | Reasoning | Black box | Transparent (optional) |
 | Privacy | Cloud only | Local-first option |
 | Focus | Speed | Quality |
@@ -282,29 +282,20 @@ Each agent outputs **exactly 4 structured insights**:
 | Feature | Cursor | CodeMind |
 |---------|--------|----------|
 | Agents | 1 | 6 |
-| Self-Correction | No | Yes (N² loop) |
+| Self-Correction | No | Yes (N2 loop) |
 | Perspectives | Single | Multi-perspective synthesis |
 | Quality Score | No | Yes (0-10) |
 
-### vs. Antigravity (Google)
-
-| Feature | Antigravity | CodeMind |
-|---------|-------------|----------|
-| Architecture | Unknown | Proven hierarchical |
-| Source | Closed | Open core |
-| Models | Google only | Multi-provider |
-| Privacy | Cloud | Local-first capable |
-
 ---
 
-## 💡 Use Cases
+## Use Cases
 
 ### 1. Code Generation
 **Input**: "Create a REST API endpoint for user registration"  
 **Output**: Complete endpoint with validation, error handling, security, tests
 
 ### 2. Code Review
-**Input**: Select code → "Review this"  
+**Input**: Select code -> "Review this"  
 **Output**: Multi-perspective analysis from all 6 agents
 
 ### 3. Refactoring
@@ -325,7 +316,7 @@ Each agent outputs **exactly 4 structured insights**:
 
 ---
 
-## 🛠️ Development Workflow
+## Development Workflow
 
 ### Project Structure
 
@@ -335,7 +326,7 @@ codemind/
 │   └── codemind-agent/      # Main extension
 │       ├── src/
 │       │   ├── agents/       # Six specialist agents
-│       │   ├── synthesis/    # ODAI + N² loop
+│       │   ├── synthesis/    # ODAI + N2 loop
 │       │   ├── llm/          # Provider abstraction
 │       │   ├── intelligence/ # Code parsing, indexing
 │       │   └── ui/           # Webviews, panels
@@ -381,7 +372,7 @@ codemind/
 
 ---
 
-## 🧪 Testing Your Changes
+## Testing Your Changes
 
 ### Unit Tests
 
@@ -398,7 +389,7 @@ test('Security Agent detects SQL injection', async () => {
 
 ```typescript
 // Test full workflows
-test('N² loop produces quality code', async () => {
+test('N2 loop produces quality code', async () => {
   const result = await n2Controller.execute(
     'Add error handling',
     agents,
@@ -425,7 +416,7 @@ test('N² loop produces quality code', async () => {
 
 ---
 
-## 🐛 Common Issues
+## Common Issues
 
 ### "Extension not activating"
 
@@ -444,7 +435,7 @@ npm run compile
 **Fix**:
 ```bash
 # Check settings
-Code → Preferences → Settings → CodeMind → OpenAI API Key
+Code -> Preferences -> Settings -> CodeMind -> OpenAI API Key
 
 # Or set in .env
 echo "OPENAI_API_KEY=sk-..." > .env
@@ -460,7 +451,7 @@ echo "OPENAI_API_KEY=sk-..." > .env
 
 ---
 
-## 📞 Getting Help
+## Getting Help
 
 **Questions?**
 1. Read the docs (you are here!)
@@ -480,7 +471,7 @@ echo "OPENAI_API_KEY=sk-..." > .env
 
 ---
 
-## 🎯 Next Steps
+## Next Steps
 
 **Ready to dive deeper?**
 
@@ -498,7 +489,7 @@ echo "OPENAI_API_KEY=sk-..." > .env
 
 ---
 
-## 🌟 The Vision
+## The Vision
 
 **Short-term** (6 months): Launch MVP with core agent system  
 **Medium-term** (1 year): 50,000 users, recognized for quality  
@@ -512,18 +503,18 @@ echo "OPENAI_API_KEY=sk-..." > .env
 
 ---
 
-## 🙏 Thank You
+## Thank You
 
 Thank you for your interest in CodeMind! Whether you're here to use it, contribute to it, or just learn from it, we're excited to have you.
 
 **Remember**: True code intelligence emerges not from a single AI, but from specialized AIs working together, continuously refined through self-correction.
 
-Let's build the future of AI-powered coding together. 🚀
+Let's build the future of AI-powered coding together.
 
 ---
 
-**Questions?** → [Discord](https://discord.gg/codemind)  
-**Issues?** → [GitHub Issues](https://github.com/yourusername/codemind/issues)  
-**Updates?** → [Twitter](https://twitter.com/codemind_ai)
+**Questions?** -> [Discord](https://discord.gg/codemind)  
+**Issues?** -> [GitHub Issues](https://github.com/yourusername/codemind/issues)  
+**Updates?** -> [Twitter](https://twitter.com/codemind_ai)
 
 *Happy coding!*

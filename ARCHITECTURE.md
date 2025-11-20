@@ -64,7 +64,7 @@
 │  └──────┬───────┘      │    │                               │
 │         │              │    │                               │
 │  ┌──────┴───────┐      │    │                               │
-│  │ N² Loop      │      │    │                               │
+│  │ N2 Loop      │      │    │                               │
 │  │ Controller   │      │    │                               │
 │  └──────────────┘      │    │                               │
 └────────┬───────────────┘    └───────────────┬───────────────┘
@@ -300,7 +300,7 @@ class ODAISynthesizer {
   }
 }
 
-// N² controller
+// N2 controller
 class N2Controller {
   async execute(
     request: string,
@@ -657,7 +657,7 @@ class LLMProviderManager {
        ├─> If score >= 9: Generate final code
        └─> If score < 9: Create repair directive
 
-5. N² Loop
+5. N2 Loop
    └─> If quality insufficient:
        ├─> Agents re-analyze with repair directive
        ├─> Synthesis re-executes
@@ -831,7 +831,7 @@ class ContextOptimizer {
 | Agent execution (single) | <2s | LLM call time |
 | Full analysis (6 agents parallel) | <3s | Bottleneck is slowest agent |
 | Synthesis | <1s | LLM call for synthesis |
-| N² iteration | <4s | One repair cycle |
+| N2 iteration | <4s | One repair cycle |
 | Symbol indexing (per file) | <100ms | Tree-sitter parsing |
 | Workspace indexing (1000 files) | <30s | Background process |
 | Autocomplete latency | <200ms | Must be nearly instant |
@@ -1052,7 +1052,7 @@ class TelemetryCollector {
 2. **Implement Agent Base** - Create agent abstraction
 3. **Build First Agent** - Security agent as POC
 4. **Add ODAI Synthesis** - Central synthesis layer
-5. **Implement N² Loop** - Quality control
+5. **Implement N2 Loop** - Quality control
 6. **Create UI Components** - Inline editing, diff view
 7. **Integrate LSP** - Code intelligence
 8. **Add LLM Providers** - OpenAI + Anthropic + local

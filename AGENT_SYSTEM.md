@@ -28,7 +28,7 @@ CodeMind's cognitive architecture mirrors human problem-solving:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│              Meta-Cognitive Layer (N²)                       │
+│              Meta-Cognitive Layer (N2)                       │
 │           "Is this solution good enough?"                    │
 │                                                               │
 │  • Self-evaluates output quality (0-10)                     │
@@ -53,8 +53,8 @@ CodeMind's cognitive architecture mirrors human problem-solving:
 │     "What matters from my specialized viewpoint?"            │
 │                                                               │
 │  Each agent analyzes code through their lens:                │
-│  🎨 Architecture • 🔧 Engineering • 🔒 Security             │
-│  ⚡ Performance • 🧪 Testing • 📚 Documentation             │
+│  Architecture • Engineering • Security                      │
+│  Performance • Testing • Documentation                      │
 └───────────────────────────────────────────────────────────────┘
 ```
 
@@ -73,31 +73,31 @@ CodeMind's cognitive architecture mirrors human problem-solving:
 - Coordination overhead
 
 **Hierarchical Solution**:
-✅ Specialization at lower layer
-✅ Synthesis at middle layer
-✅ Quality control at top layer
-✅ Clear information flow
+- Specialization at lower layer
+- Synthesis at middle layer
+- Quality control at top layer
+- Clear information flow
 
 ---
 
 ## The Six Specialist Agents
 
-### 🎨 Architect Agent
+### Architect Agent
 
 **Role**: Software Architecture & Design
 
 **Cognitive Focus**: Structure, patterns, maintainability, scalability
 
 **What They Check**:
-- ✅ SOLID principles adherence
-- ✅ Design pattern appropriateness
-- ✅ Separation of concerns
-- ✅ Code organization and modularity
-- ✅ Dependency management
-- ✅ Future extensibility
-- ⚠️ Over-engineering
-- ⚠️ Tight coupling
-- ⚠️ God classes/functions
+- SOLID principles adherence
+- Design pattern appropriateness
+- Separation of concerns
+- Code organization and modularity
+- Dependency management
+- Future extensibility
+- Over-engineering
+- Tight coupling
+- God classes/functions
 
 **Example Analysis**:
 ```typescript
@@ -125,23 +125,23 @@ Recommendations:
 
 ---
 
-### 🔧 Engineer Agent
+### Engineer Agent
 
 **Role**: Implementation Correctness & Best Practices
 
 **Cognitive Focus**: Correctness, edge cases, error handling, robustness
 
 **What They Check**:
-- ✅ Logic correctness
-- ✅ Edge case handling
-- ✅ Error handling and recovery
-- ✅ Input validation
-- ✅ Null/undefined checks
-- ✅ Type safety
-- ✅ Language idioms
-- ⚠️ Off-by-one errors
-- ⚠️ Race conditions
-- ⚠️ Resource leaks
+- Logic correctness
+- Edge case handling
+- Error handling and recovery
+- Input validation
+- Null/undefined checks
+- Type safety
+- Language idioms
+- Off-by-one errors
+- Race conditions
+- Resource leaks
 
 **Example Analysis**:
 ```typescript
@@ -162,9 +162,9 @@ Edge Cases to Consider:
 - Concurrent modifications during pagination
 
 Error Handling:
-- Invalid parameters → 400 Bad Request with clear message
-- Database error → 500 with retry suggestion
-- Timeout → 504 Gateway Timeout
+- Invalid parameters -> 400 Bad Request with clear message
+- Database error -> 500 with retry suggestion
+- Timeout -> 504 Gateway Timeout
 
 Implementation:
 ```typescript
@@ -212,23 +212,23 @@ async function getPaginatedUsers(
 
 ---
 
-### 🔒 Security Agent
+### Security Agent
 
 **Role**: Security & Privacy Protection
 
 **Cognitive Focus**: Vulnerabilities, data protection, threat mitigation
 
 **What They Check**:
-- ✅ Authentication and authorization
-- ✅ Input sanitization
-- ✅ SQL injection prevention
-- ✅ XSS prevention
-- ✅ CSRF protection
-- ✅ Sensitive data exposure
-- ✅ Cryptographic security
-- ⚠️ Hardcoded secrets
-- ⚠️ Insecure dependencies
-- ⚠️ Privilege escalation
+- Authentication and authorization
+- Input sanitization
+- SQL injection prevention
+- XSS prevention
+- CSRF protection
+- Sensitive data exposure
+- Cryptographic security
+- Hardcoded secrets
+- Insecure dependencies
+- Privilege escalation
 
 **Example Analysis**:
 ```typescript
@@ -236,19 +236,19 @@ async function getPaginatedUsers(
 
 Security Analysis:
 1. SQL Injection Risk: HIGH
-   - User input directly in query → Use parameterized queries
+   - User input directly in query -> Use parameterized queries
    
 2. XSS Risk: MEDIUM  
-   - Search results rendered in HTML → Escape output
+   - Search results rendered in HTML -> Escape output
    
 3. DoS Risk: MEDIUM
-   - Expensive search on large dataset → Add rate limiting
+   - Expensive search on large dataset -> Add rate limiting
    
 4. Data Exposure Risk: LOW
-   - Search might reveal sensitive data → Check permissions
+   - Search might reveal sensitive data -> Check permissions
    
 5. Injection via Special Characters: MEDIUM
-   - Wildcards in LIKE queries → Escape special chars
+   - Wildcards in LIKE queries -> Escape special chars
 
 Secure Implementation:
 ```typescript
@@ -288,34 +288,34 @@ private sanitizeSearchQuery(query: string): string {
 ```
 
 Vulnerabilities Found:
-- ❌ No rate limiting (DoS)
-- ❌ Potential SQL injection if query not parameterized
-- ❌ XSS if output not escaped
-- ❌ Data leakage if permissions not checked
+- No rate limiting (DoS)
+- Potential SQL injection if query not parameterized
+- XSS if output not escaped
+- Data leakage if permissions not checked
 
-Security Level: 🔒🔒⚫⚫⚫ (2/5 - UNSAFE)
+Security Level: 2/5 - UNSAFE
 ```
 
 **Agent Personality**: Paranoid, assumes malicious input, zero-trust mindset, values defense-in-depth.
 
 ---
 
-### ⚡ Performance Agent
+### Performance Agent
 
 **Role**: Optimization & Scalability
 
 **Cognitive Focus**: Time complexity, space complexity, bottlenecks, scaling
 
 **What They Check**:
-- ✅ Algorithm efficiency (Big O)
-- ✅ Database query optimization
-- ✅ Caching opportunities
-- ✅ Memory usage
-- ✅ Network calls
-- ✅ Concurrent operations
-- ⚠️ N+1 query problems
-- ⚠️ Unnecessary loops
-- ⚠️ Memory leaks
+- Algorithm efficiency (Big O)
+- Database query optimization
+- Caching opportunities
+- Memory usage
+- Network calls
+- Concurrent operations
+- N+1 query problems
+- Unnecessary loops
+- Memory leaks
 
 **Example Analysis**:
 ```typescript
@@ -344,16 +344,16 @@ async function getUserWithContent(userId: string) {
 
 Issues:
 1. N+1 Query Problem: 1 + 1 + N queries
-   - For 100 posts → 102 database queries
-   - Each query ~10ms → 1+ second total
+   - For 100 posts -> 102 database queries
+   - Each query ~10ms -> 1+ second total
    
 2. Sequential Execution:
    - No parallelization
    - Blocks on each query
    
 3. No Pagination:
-   - Loading ALL posts → memory issue for power users
-   - No limit on comments → unbounded growth
+   - Loading ALL posts -> memory issue for power users
+   - No limit on comments -> unbounded growth
 
 Optimized Implementation:
 ```typescript
@@ -401,10 +401,10 @@ async function getUserWithContent(
 ```
 
 Performance Improvements:
-- Queries: 102 → 1 (100x reduction)
-- Time: ~1000ms → ~20ms (50x faster)
-- Memory: O(all data) → O(limited data)
-- Scalability: Poor → Good
+- Queries: 102 -> 1 (100x reduction)
+- Time: ~1000ms -> ~20ms (50x faster)
+- Memory: O(all data) -> O(limited data)
+- Scalability: Poor -> Good
 
 Additional Optimizations:
 1. Add caching (Redis) for frequently accessed users
@@ -413,30 +413,30 @@ Additional Optimizations:
 4. Add database indexes on foreign keys
 
 Complexity:
-- Time: O(N) → O(1) per query
-- Space: O(unlimited) → O(postLimit + commentLimit)
+- Time: O(N) -> O(1) per query
+- Space: O(unlimited) -> O(postLimit + commentLimit)
 ```
 
 **Agent Personality**: Obsessed with efficiency, thinks about scale, values fast execution paths, questions every loop.
 
 ---
 
-### 🧪 Testing Agent
+### Testing Agent
 
 **Role**: Testability & Quality Assurance
 
 **Cognitive Focus**: Test coverage, testability, test scenarios, QA
 
 **What They Check**:
-- ✅ Unit test requirements
-- ✅ Integration test scenarios
-- ✅ Edge case test coverage
-- ✅ Mocking dependencies
-- ✅ Test data setup
-- ✅ Testability of design
-- ⚠️ Hard-to-test code
-- ⚠️ Missing assertions
-- ⚠️ Flaky test risks
+- Unit test requirements
+- Integration test scenarios
+- Edge case test coverage
+- Mocking dependencies
+- Test data setup
+- Testability of design
+- Hard-to-test code
+- Missing assertions
+- Flaky test risks
 
 **Example Analysis**:
 ```typescript
@@ -445,11 +445,11 @@ Complexity:
 Testing Analysis:
 
 Code Testability Assessment:
-✅ Good separation of concerns (EmailService injectable)
-✅ Time-dependent logic uses injected clock (testable)
-⚠️ Direct database calls (should use repository)
-❌ Hard-coded email templates (not testable)
-❌ No interface for EmailProvider (can't mock)
+- Good separation of concerns (EmailService injectable)
+- Time-dependent logic uses injected clock (testable)
+- Direct database calls (should use repository)
+- Hard-coded email templates (not testable)
+- No interface for EmailProvider (can't mock)
 
 Required Tests:
 
@@ -637,22 +637,22 @@ Quality Gates:
 
 ---
 
-### 📚 Documentation Agent
+### Documentation Agent
 
 **Role**: Code Clarity & Documentation
 
 **Cognitive Focus**: Readability, understandability, documentation quality
 
 **What They Check**:
-- ✅ Code clarity and naming
-- ✅ Comment quality
-- ✅ API documentation
-- ✅ Type definitions
-- ✅ Example usage
-- ✅ README completeness
-- ⚠️ Unclear variable names
-- ⚠️ Missing documentation
-- ⚠️ Outdated comments
+- Code clarity and naming
+- Comment quality
+- API documentation
+- Type definitions
+- Example usage
+- README completeness
+- Unclear variable names
+- Missing documentation
+- Outdated comments
 
 **Example Analysis**:
 ```typescript
@@ -661,10 +661,10 @@ Quality Gates:
 Documentation Analysis:
 
 Code Clarity Issues:
-❌ Function name 'processWH' is unclear (what's WH?)
-❌ Variable 'x' has no meaning
-❌ No comments explaining webhook signature verification
-⚠️ Complex regex without explanation
+- Function name 'processWH' is unclear (what's WH?)
+- Variable 'x' has no meaning
+- No comments explaining webhook signature verification
+- Complex regex without explanation
 
 Improved Version:
 ```typescript
@@ -795,7 +795,7 @@ CodeMind can send webhooks to notify your application of events.
 ### Configuration
 
 Set up webhooks in your dashboard:
-1. Go to Settings → Webhooks
+1. Go to Settings -> Webhooks
 2. Add endpoint URL (must be HTTPS)
 3. Copy the signing secret
 4. Select events to subscribe to
@@ -914,13 +914,13 @@ interface WebhookRequest {
 ```
 
 Documentation Quality Score: 8.5/10
-- ✅ Clear function names
-- ✅ Comprehensive comments
-- ✅ Type definitions
-- ✅ Examples provided
-- ✅ Security considerations explained
-- ⚠️ Could add sequence diagram for flow
-- ⚠️ Missing troubleshooting guide
+- Clear function names
+- Comprehensive comments
+- Type definitions
+- Examples provided
+- Security considerations explained
+- Could add sequence diagram for flow
+- Missing troubleshooting guide
 ```
 
 **Agent Personality**: Thinks like a new team member reading code, values clarity, catches confusing names, insists on examples.
@@ -1332,7 +1332,7 @@ Return JSON:
 
 ---
 
-## N² Self-Correction Loop
+## N2 Self-Correction Loop
 
 ### The Meta-Cognitive Layer
 
@@ -1344,7 +1344,7 @@ class N2Controller {
   ) {}
   
   /**
-   * Execute N² loop: iterative refinement until quality threshold met
+   * Execute N2 loop: iterative refinement until quality threshold met
    * 
    * @returns Final result with iteration history
    */
@@ -1358,7 +1358,7 @@ class N2Controller {
     let currentRepairDirective: RepairDirective | undefined;
     
     for (let i = 0; i < this.maxIterations; i++) {
-      console.log(`N² Iteration ${i + 1}/${this.maxIterations}`);
+      console.log(`N2 Iteration ${i + 1}/${this.maxIterations}`);
       
       // Execute all agents in parallel
       const startTime = Date.now();
@@ -1450,7 +1450,7 @@ interface Iteration {
 }
 ```
 
-### When N² Triggers
+### When N2 Triggers
 
 ```typescript
 // Example: First iteration produces score of 7.5
@@ -1459,26 +1459,26 @@ Iteration 1:
   Quality Score: 7.5/10
   Rationale: "Missing input validation, no error handling"
   
-  → Repair Directive:
+  -> Repair Directive:
     - Engineer: "Add comprehensive input validation"
     - Engineer: "Implement error handling for all failure modes"
     - Security: "Sanitize user inputs"
 
 Iteration 2:
-  Agents re-analyze with directive → Synthesizer produces improved code
+  Agents re-analyze with directive -> Synthesizer produces improved code
   Quality Score: 8.8/10
   Rationale: "Good validation and errors, but performance could be better"
   
-  → Repair Directive:
+  -> Repair Directive:
     - Performance: "Optimize database queries"
     - Performance: "Add caching for repeated lookups"
 
 Iteration 3:
-  Agents re-analyze → Synthesizer produces final code
+  Agents re-analyze -> Synthesizer produces final code
   Quality Score: 9.3/10
   Rationale: "Excellent implementation, all concerns addressed"
   
-  ✓ Accept and present to user
+  - Accept and present to user
 ```
 
 ---
