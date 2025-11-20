@@ -1,514 +1,851 @@
-# MainE1 Design Principles
+# CodeMind Design Principles
 
-> **Core architectural philosophy and design patterns for building the N² Overmind Platform**
+> **Core philosophical and practical principles guiding CodeMind's development**
 
-## 🎯 Foundational Principles
-
-### 1. **Hierarchical Over Flat**
-
-**Principle:** True intelligence emerges from hierarchical synthesis, not democratic voting.
-
-**Why:** Human cognition operates in layers - unconscious processing, conscious thought, and meta-cognition. MainE1 mirrors this with:
-- **Lower Layer**: Parallel specialized processing (sub-personalities)
-- **Upper Layer**: Meta-cognitive synthesis (central consciousness)
-- **Meta-Meta Layer**: Self-evaluation and correction (N² loop)
-
-**Implications:**
-- Never flatten the architecture into peer-to-peer agents
-- Maintain clear separation between processing and synthesis layers
-- Preserve the hierarchy in UI visualizations and APIs
+**Version**: 1.0  
+**Last Updated**: November 2025
 
 ---
 
-### 2. **Self-Correction is Mandatory, Not Optional**
+## Foundational Philosophy
 
-**Principle:** Quality assurance must be intrinsic to the reasoning process, not an external validation step.
-
-**Why:** Post-hoc validation is too late. The system must continuously evaluate and correct itself during generation.
-
-**Implementation:**
-- Every synthesis receives an internal quality score (0-10)
-- Threshold enforcement: score ≥9 required for output
-- Automatic repair directives when threshold not met
-- Maximum 4 N² iterations to prevent infinite loops
-- Each iteration must show measurable improvement
-
-**Implications:**
-- Never bypass the quality scoring mechanism
-- Log all N² iterations for analysis and improvement
-- Build UI indicators for self-correction events
-- Optimize for speed without compromising quality checks
+**Principle**: CodeMind is built on the belief that **true code intelligence emerges from multiple specialized perspectives synthesized through meta-cognitive reflection**, not from a single AI model trying to do everything.
 
 ---
 
-### 3. **Constraint Breeds Clarity**
+## The Ten Commandments
 
-**Principle:** Tight constraints on agent outputs prevent rambling and ensure signal-to-noise ratio.
+### 1. Hierarchical Over Flat
 
-**Why:** Unlimited output leads to:
-- Verbose, unfocused responses
-- Hidden hallucinations in fluff text
-- Difficult synthesis (too much irrelevant data)
-- Wasted tokens and processing time
+**Principle**: Intelligence emerges from hierarchical synthesis, not democratic voting.
 
-**Implementation:**
-- Sub-personalities output **exactly 4 numbered SIM lines**
-- Central consciousness outputs **only** the final answer (no process trace)
-- No agent reveals internal mechanics in user-facing output
-- Structured formats enforced through prompt engineering and validation
+**Why**: 
+- Human cognition is hierarchical (unconscious → conscious → meta-cognitive)
+- The best development teams have structure (ICs → Tech Leads → Architects)
+- Flat multi-agent systems suffer from coordination chaos
 
-**Implications:**
-- Validate output structure before processing
-- Reject malformed agent responses
-- Design prompts that reinforce constraints
-- UI should hide internal structure by default (with toggle for advanced users)
+**Implementation**:
+```
+✓ Three distinct layers: Specialists → Synthesis → Quality Control
+✓ Clear information flow: bottom-up analysis, top-down refinement
+✓ No agent-to-agent communication (prevents chaos)
+✗ Avoid: Flat voting mechanisms, agent debates, circular dependencies
+```
 
----
+**Example**:
+```typescript
+// GOOD: Hierarchical
+const analyses = await executeAgents(code);        // Layer 1: Specialists
+const synthesis = await synthesize(analyses);      // Layer 2: Integration
+const final = await qualityCheck(synthesis);       // Layer 3: Validation
 
-### 4. **Separation of Concerns: Six Cognitive Lenses**
-
-**Principle:** Different types of thinking require different cognitive modes.
-
-**Why:** Complex problems need analysis from multiple specialized perspectives:
-
-| Agent | Cognitive Focus | Prevents |
-|-------|----------------|----------|
-| **Creative Clarity** | Divergent thinking, ideation | Tunnel vision, lack of innovation |
-| **Structural Clarity** | Organization, systematic analysis | Chaos, cognitive overload |
-| **Self-Alignment** | Values, goals, coherence | Mission drift, contradictions |
-| **Decision Support** | Options, trade-offs, frameworks | Analysis paralysis, hasty choices |
-| **Recovery Management** | Stress points, emotional intelligence | Burnout, negative spirals |
-| **Boundary Clarity** | Limits, constraints, realism | Overcommitment, unrealistic expectations |
-
-**Implementation:**
-- Each agent has a distinct "personality" encoded in its role, goal, and backstory
-- Agents never delegate (no cross-contamination)
-- Agents never reference other agents
-- Configurable but maintain the six-category framework
-
-**Implications:**
-- When adding new agent types, ensure they fill a distinct cognitive niche
-- Don't create redundant agents with overlapping purposes
-- UI should visually distinguish agent types with color/icon coding
-- Allow users to customize agent prompts while preserving core purpose
+// BAD: Flat
+const consensus = await agentsVote(code);          // Voting is not intelligence
+```
 
 ---
 
-### 5. **Process Transparency with Output Cleanliness**
+### 2. Self-Correction is Mandatory
 
-**Principle:** Internal process should be fully transparent for debugging, but user-facing output must be pristine.
+**Principle**: Quality assurance must be intrinsic to the generation process, not an afterthought.
 
-**Why:** 
-- Developers need visibility for improvement
-- Users don't care about internal mechanics
-- Exposing process details reduces trust ("why does it need multiple tries?")
+**Why**:
+- Post-hoc validation is too late (damage done)
+- External review doesn't understand the reasoning process
+- Best developers self-review before committing
 
-**Implementation:**
-- **User Mode**: Clean markdown output only
-- **Debug Mode**: Full process trace, scores, iterations, agent contributions
-- **Analytics Mode**: Aggregated metrics, patterns, performance data
+**Implementation**:
+```
+✓ Every output gets a quality score (0-10)
+✓ Threshold enforcement (score ≥ 9 or refine)
+✓ Up to 4 N² iterations for refinement
+✓ Repair directives are specific and actionable
+✗ Avoid: Accepting first output, skipping validation, vague feedback
+```
 
-**Implications:**
-- Dual logging system (user-facing vs. internal)
-- UI toggle between modes (default: clean)
-- Comprehensive telemetry for continuous improvement
-- Never log sensitive data from conversations
+**Measurement**:
+- Track N² trigger rate (target: 20-30%)
+- Monitor quality score distribution (target: 85%+ above 9.0)
+- Measure hallucination rate (target: <2%)
 
 ---
 
-### 6. **LLM Agnostic Architecture**
+### 3. Specialization Breeds Excellence
 
-**Principle:** The cognitive architecture must work with any sufficiently capable LLM.
+**Principle**: Six specialized cognitive perspectives are better than one generalist.
 
-**Why:**
+**Why**:
+- No single LLM can be expert at everything simultaneously
+- Human developers specialize (security expert ≠ performance expert)
+- Focused analysis is deeper than scattered analysis
+
+**Implementation**:
+```
+✓ Each agent has a clear, distinct role
+✓ Agents never overlap in responsibility
+✓ Agents are optimized for their domain (different prompts, models, temps)
+✗ Avoid: Redundant agents, vague roles, one-agent-does-all
+```
+
+**The Six Domains**:
+```
+🎨 Architecture:    Long-term design, maintainability, patterns
+🔧 Engineering:     Correctness, edge cases, robustness
+🔒 Security:        Vulnerabilities, data protection, threat mitigation
+⚡ Performance:     Optimization, scalability, efficiency
+🧪 Testing:         Testability, test coverage, QA
+📚 Documentation:   Clarity, understandability, maintainability
+```
+
+**Non-Negotiable**: These six perspectives are foundational. Adding more is possible, removing any is not.
+
+---
+
+### 4. Synthesis Over Voting
+
+**Principle**: ODAI synthesis (Observe → Distill → Adapt → Integrate) produces superior outcomes to voting.
+
+**Why**:
+- Voting discards nuance ("3 say yes, 2 say no" loses the "why")
+- Synthesis resolves conflicts intelligently
+- Meta-cognition mirrors how humans integrate diverse opinions
+
+**Implementation**:
+```typescript
+// BAD: Voting
+const votes = agents.map(a => a.vote(code));
+const decision = majority(votes); // Lost all nuance
+
+// GOOD: Synthesis
+const analyses = agents.map(a => a.analyze(code));
+const synthesis = odaiCycle({
+  observe: identifyPatterns(analyses),
+  distill: extractCoreTruths(analyses),
+  adapt: resolveConflicts(analyses),
+  integrate: unifyPerspectives(analyses)
+});
+```
+
+**ODAI Phases**:
+1. **Observe**: What does each perspective see? What patterns emerge?
+2. **Distill**: What are the core truths? What's the quality score?
+3. **Adapt**: If quality low, what specific improvements are needed?
+4. **Integrate**: If quality high, what's the unified solution?
+
+---
+
+### 5. Context is Sacred
+
+**Principle**: Code cannot be analyzed in isolation. Context is critical.
+
+**Why**:
+- The "right" solution depends on framework, language, constraints
+- Same code may be perfect in one context, terrible in another
+- Best developers always consider context
+
+**Context Categories**:
+```
+File Context:
+- Current file content
+- File path and location
+- Language and framework
+
+Project Context:
+- Related symbols (functions, classes, imports)
+- Dependencies and versions
+- Project structure
+
+Semantic Context:
+- Recent changes (git history)
+- Related code (semantic search)
+- User's previous requests
+
+Execution Context:
+- Runtime environment (browser, Node.js, etc.)
+- Performance constraints
+- Security requirements
+```
+
+**Implementation**:
+```typescript
+interface CodeContext {
+  // File-level
+  filePath: string;
+  language: string;
+  content: string;
+  selection: Range;
+  
+  // Project-level
+  symbols: Symbol[];
+  dependencies: Dependency[];
+  framework?: string;
+  
+  // Semantic
+  relatedCode: CodeFragment[];
+  recentChanges: GitCommit[];
+  
+  // Execution
+  runtime: Runtime;
+  constraints: Constraints;
+}
+```
+
+**Gathering Strategy**:
+```
+Priority 1: Current file + selection (always)
+Priority 2: Directly referenced symbols (imports, calls)
+Priority 3: Semantically similar code (vector search)
+Priority 4: Recent changes in same file/module
+```
+
+---
+
+### 6. Transparency with Cleanliness
+
+**Principle**: Users see clean code by default, but can explore the reasoning process.
+
+**Why**:
+- Most users want the code, not the process
+- Exposing agents/iterations creates confusion ("why did it need 3 tries?")
+- Power users benefit from seeing the reasoning
+
+**Implementation**:
+```
+Default View:
+- Clean code diff
+- Brief explanation
+- Accept/Reject buttons
+
+Debug Mode (toggle):
+- All agent analyses
+- Quality scores per iteration
+- N² loop history
+- Repair directives
+- Timing breakdown
+
+Never Show:
+- Agent names in main interface ("Security Agent says...")
+- Internal scores in default view
+- Process terminology (ODAI, N², etc.)
+```
+
+**UI Example**:
+```
+┌─────────────────────────────────────────┐
+│ Generated: Added error handling         │ [ⓘ Show Details]
+│                                         │
+│  + try {                                │
+│  +   const result = await fetchData(); │
+│  +   return result;                     │
+│  + } catch (error) {                    │
+│  +   logger.error(error);               │
+│  +   throw new DataFetchError();        │
+│  + }                                    │
+│                                         │
+│ [Accept] [Reject] [Modify]             │
+└─────────────────────────────────────────┘
+
+[Click ⓘ]
+
+┌─────────────────────────────────────────┐
+│ Analysis Details                        │
+│                                         │
+│ Quality Score: 9.3/10                   │
+│ Iterations: 2 (first: 8.1, second: 9.3)│
+│                                         │
+│ Perspectives:                           │
+│ • Architecture: Good error boundary     │
+│ • Engineering: Proper exception type    │
+│ • Security: No sensitive data in logs   │
+│ • Performance: Minimal overhead         │
+│ • Testing: Easily testable              │
+│ • Documentation: Clear error handling   │
+└─────────────────────────────────────────┘
+```
+
+---
+
+### 7. Local-First, Cloud-Optional
+
+**Principle**: CodeMind must work 100% offline with local models. Cloud is an enhancement, not a requirement.
+
+**Why**:
+- Developer trust (code never leaves machine)
+- Enterprise security requirements
+- Competitive differentiation
+- No vendor lock-in
+
+**Implementation**:
+```
+Modes:
+1. Local-Only:
+   - Uses Ollama/llama.cpp
+   - All processing on device
+   - No network calls
+   - Slightly slower, but private
+   
+2. Hybrid (Recommended):
+   - Local for sensitive code
+   - Cloud for general code
+   - Automatic classification
+   
+3. Cloud-Only:
+   - Uses OpenAI/Anthropic
+   - Fastest performance
+   - Requires API keys
+```
+
+**Sensitivity Detection**:
+```typescript
+function isSensitive(code: string, context: CodeContext): boolean {
+  const sensitivePatterns = [
+    /api[_-]?key/i,
+    /password/i,
+    /secret/i,
+    /token/i,
+    /private[_-]?key/i
+  ];
+  
+  // Check code content
+  if (sensitivePatterns.some(p => p.test(code))) return true;
+  
+  // Check file path
+  if (context.filePath.includes('secrets') || 
+      context.filePath.includes('.env')) return true;
+  
+  // Check user configuration
+  if (context.userMarkedSensitive) return true;
+  
+  return false;
+}
+
+// Route based on sensitivity
+const provider = isSensitive(code, context) 
+  ? localProvider 
+  : cloudProvider;
+```
+
+**User Control**:
+```json
+{
+  "codemind.privacyMode": "hybrid",
+  "codemind.localModel": "codellama:13b",
+  "codemind.cloudProvider": "openai",
+  "codemind.sensitivePatterns": [
+    "custom-secret-pattern",
+    "internal-api-*"
+  ]
+}
+```
+
+---
+
+### 8. Speed Through Intelligence, Not Shortcuts
+
+**Principle**: We compete on quality and thoroughness, not pure speed.
+
+**Why**:
+- Single-model systems will always be faster (fewer LLM calls)
+- Our value is multi-perspective analysis + self-correction
+- Developers prefer correct over fast
+
+**Strategy**:
+```
+Optimize WITHIN our architecture:
+✓ Parallel agent execution (6 agents in 3s, not 18s)
+✓ Intelligent caching (same context = cached result)
+✓ Progressive disclosure (show fast agents first, slow agents later)
+✓ Smart context gathering (only relevant context)
+
+DON'T sacrifice quality:
+✗ Skipping agents to save time
+✗ Lowering quality threshold
+✗ Accepting first synthesis without validation
+✗ Reducing context to fit token limits
+```
+
+**Performance Targets**:
+```
+Inline Edit (Ctrl+K):
+- First response: <4s
+- With N² refinement: <8s
+- Progressive: Show after 2s (partial), update when complete
+
+Autocomplete (Tab):
+- Latency: <200ms (must be instant)
+- Strategy: Single fast agent, no N² loop
+
+Code Review:
+- Full analysis: <6s
+- Acceptable: Users expect thorough review to take time
+```
+
+**Perceived Performance**:
+```typescript
+// Show progressive results
+async function generateWithProgress(request: string) {
+  // Show fast agents first
+  const engineerAnalysis = await engineerAgent.analyze(request);
+  showPartial(engineerAnalysis);
+  
+  // Add remaining agents
+  const allAnalyses = await Promise.all([
+    engineerAnalysis, // Already complete
+    ...otherAgents.map(a => a.analyze(request))
+  ]);
+  
+  // Synthesize and show final
+  const synthesis = await synthesize(allAnalyses);
+  showFinal(synthesis);
+}
+```
+
+---
+
+### 9. Model-Agnostic Architecture
+
+**Principle**: Never couple to a specific LLM provider or model.
+
+**Why**:
 - LLM landscape changes rapidly
-- Different use cases need different models (cost, privacy, performance)
-- Vendor lock-in is anti-pattern for enterprise software
+- Different models excel at different tasks
+- Users have different preferences (cost vs quality vs privacy)
+- Vendor lock-in is an anti-pattern
 
-**Implementation:**
-- Abstract LLM interface layer
-- Provider adapters (OpenAI, Anthropic, local models, custom endpoints)
-- Fallback mechanisms for API failures
-- Model-specific prompt optimization
-- Performance benchmarking across providers
+**Implementation**:
+```typescript
+interface LLMProvider {
+  name: string;
+  models: string[];
+  
+  generate(prompt: string, config: Config): Promise<Response>;
+  stream(prompt: string, config: Config): AsyncIterable<string>;
+  countTokens(text: string): number;
+}
 
-**Implications:**
-- Design prompts to be model-agnostic where possible
-- Test against multiple LLM providers regularly
-- Allow per-agent model configuration
-- Document model-specific quirks and workarounds
+// Implementations
+class OpenAIProvider implements LLMProvider { /* ... */ }
+class AnthropicProvider implements LLMProvider { /* ... */ }
+class LocalProvider implements LLMProvider { /* ... */ }
 
----
+// Provider selection
+class ProviderSelector {
+  select(request: Request): LLMProvider {
+    // Consider: cost, speed, privacy, capability
+    if (request.requiresPrivacy) return localProvider;
+    if (request.requiresSpeed) return fastestProvider;
+    if (request.requiresQuality) return bestProvider;
+    return defaultProvider;
+  }
+}
+```
 
-### 7. **Configuration Over Hardcoding**
+**Per-Agent Models**:
+```typescript
+// Different agents can use different models
+const agentConfigs = {
+  architect: { provider: 'openai', model: 'gpt-4' },        // Needs reasoning
+  engineer: { provider: 'openai', model: 'gpt-4-turbo' },   // Fast + capable
+  security: { provider: 'anthropic', model: 'claude-3.5-sonnet' }, // Security focus
+  performance: { provider: 'local', model: 'codellama:34b' }, // Can run locally
+  testing: { provider: 'openai', model: 'gpt-4-turbo' },
+  documentation: { provider: 'openai', model: 'gpt-3.5-turbo' } // Less critical
+};
+```
 
-**Principle:** Everything must be configurable through data, not code changes.
+**Fallback Chains**:
+```typescript
+class FallbackProvider implements LLMProvider {
+  constructor(private providers: LLMProvider[]) {}
+  
+  async generate(prompt: string, config: Config): Promise<Response> {
+    for (const provider of this.providers) {
+      try {
+        return await provider.generate(prompt, config);
+      } catch (error) {
+        logger.warn(`Provider ${provider.name} failed, trying next`);
+      }
+    }
+    throw new Error('All providers failed');
+  }
+}
 
-**Why:** Enterprise software needs:
-- Runtime customization without redeployment
-- A/B testing of prompt variations
-- Domain-specific agent tuning
-- Multi-tenant customization
-
-**Implementation:**
-- Agent definitions stored in database
-- Prompt templates with variable substitution
-- Configurable thresholds (quality score, max iterations)
-- Custom workflow definitions (agent sequences, parallel/sequential)
-- Feature flags for experimental capabilities
-
-**Implications:**
-- Build admin UI for configuration management
-- Validate configurations before saving
-- Version control for prompt templates
-- Rollback mechanisms for bad configurations
-
----
-
-### 8. **Real-Time Streaming is Non-Negotiable**
-
-**Principle:** Long-running multi-agent processes must provide real-time feedback.
-
-**Why:**
-- Users need to see progress (UX)
-- Timeout detection and recovery
-- Debugging and monitoring
-- Trust building (transparency)
-
-**Implementation:**
-- WebSocket connections for live updates
-- Event-driven architecture with pub/sub
-- Incremental output streaming
-- Progress indicators (agent completion, synthesis phase, N² iteration)
-- Graceful degradation to polling if WebSocket unavailable
-
-**Implications:**
-- Backend must be async-first (FastAPI, asyncio)
-- Frontend state management for real-time updates (Redux, Zustand)
-- Reconnection logic for dropped connections
-- Message deduplication and ordering
-
----
-
-### 9. **Conversation Context is Sacred**
-
-**Principle:** Multi-turn conversations must maintain coherent context across exchanges.
-
-**Why:** 
-- Follow-up questions require previous context
-- Consistency across turns builds trust
-- Complex reasoning often requires multi-turn refinement
-
-**Implementation:**
-- Persistent conversation history
-- Sliding window context (last N turns)
-- Semantic compression for long histories
-- Context injection for all agents
-- Clear context boundaries (what's visible to which layer)
-
-**Implications:**
-- Database schema supports conversation threads
-- Context size monitoring (token limits)
-- Summarization for ultra-long conversations
-- User control over context retention (privacy)
+const providerWithFallback = new FallbackProvider([
+  openaiProvider,
+  anthropicProvider,
+  localProvider // Always works (offline)
+]);
+```
 
 ---
 
-### 10. **Fail Gracefully, Learn Continuously**
+### 10. VSCode Foundation, Not Reinvention
 
-**Principle:** System failures should degrade gracefully and contribute to improvement.
+**Principle**: Fork VSCode, don't build an editor from scratch.
 
-**Why:**
-- 100% uptime is impossible
-- LLM APIs fail
-- Unexpected inputs happen
-- System must learn from failures
+**Why**:
+- VSCode is battle-tested (100M+ users)
+- Massive ecosystem (extensions, themes, language support)
+- Developer familiarity
+- Focus our effort on AI, not editor basics
 
-**Implementation:**
-- Circuit breakers for external API calls
-- Fallback responses (degraded but functional)
-- Comprehensive error logging with context
-- Automatic retry with exponential backoff
-- Post-mortem analysis for failures
+**What We Leverage**:
+```
+✓ Editor core (text editing, syntax highlighting)
+✓ LSP integration (language intelligence)
+✓ Extension API (our agent system as extension)
+✓ Terminal, Git, Debugging (all built-in)
+✓ File system handling
+✓ UI framework (webviews, panels, etc.)
+```
 
-**Implications:**
-- User sees "partial answer" not "500 error"
-- Telemetry captures failure modes
-- Regular analysis of failure patterns
-- Continuous prompt and architecture refinement
+**What We Add**:
+```
+✓ Agent system (our unique architecture)
+✓ ODAI synthesis layer
+✓ N² self-correction loop
+✓ Code intelligence layer (symbol indexing, embeddings)
+✓ LLM provider abstraction
+✓ Custom UI for agent visualization
+```
 
----
+**Integration Strategy**:
+```typescript
+// Our extension integrates seamlessly
+export function activate(context: vscode.ExtensionContext) {
+  // Register our AI features
+  context.subscriptions.push(
+    vscode.commands.registerCommand('codemind.inlineEdit', handleInlineEdit),
+    vscode.languages.registerCompletionItemProvider('*', completionProvider),
+    vscode.languages.registerCodeActionsProvider('*', codeActionProvider)
+  );
+  
+  // Use VSCode's existing capabilities
+  const editor = vscode.window.activeTextEditor;
+  const document = editor.document;
+  const selection = editor.selection;
+  const languageId = document.languageId;
+  
+  // VSCode handles all the editor stuff, we handle the AI
+}
+```
 
-## 🏗️ Architectural Patterns
+**Contribution Strategy**:
+```
+Where possible, contribute improvements back to VSCode:
+- Better language server support
+- Improved extension APIs
+- Bug fixes
 
-### Microservices Architecture
-
-**Services:**
-1. **Gateway Service** - API gateway, authentication, rate limiting
-2. **Orchestration Service** - Agent coordination, workflow execution
-3. **LLM Service** - Provider abstraction, prompt management
-4. **Synthesis Service** - ODAI cycle, N² loop logic
-5. **Storage Service** - Database abstraction, caching
-6. **Analytics Service** - Metrics, logging, monitoring
-7. **WebSocket Service** - Real-time communication
-
-**Communication:**
-- Synchronous: REST for command/query
-- Asynchronous: Message queue (RabbitMQ, Kafka) for events
-- Real-time: WebSocket for streaming
-
----
-
-### Event-Driven Architecture
-
-**Key Events:**
-- `ConversationStarted`
-- `QueryReceived`
-- `AgentTaskCreated`
-- `AgentTaskCompleted`
-- `SynthesisStarted`
-- `QualityScoreAssigned`
-- `N2RepairTriggered`
-- `FinalOutputGenerated`
-- `ConversationEnded`
-
-**Benefits:**
-- Decoupled services
-- Scalability
-- Audit trail
-- Real-time monitoring
+Keep our AI layer proprietary (competitive advantage)
+```
 
 ---
 
-### Database Strategy
+## Architectural Patterns
 
-**PostgreSQL (Primary):**
-- Conversations and messages
-- User accounts and organizations
-- Agent configurations
-- Workflow definitions
+### Pattern 1: Separation of Concerns
 
-**Redis (Caching):**
-- Active conversation state
-- Rate limiting counters
-- Real-time metrics
+```
+VSCode Core        → Editor, file system, UI framework
+Extension Layer    → Integration with VSCode APIs
+Agent System       → Our cognitive architecture
+Code Intelligence  → Parsing, indexing, embeddings
+LLM Layer          → Provider abstraction
+```
 
-**Vector Database (Semantic Search):**
-- Conversation embeddings
-- Similar query retrieval
-- Template recommendations
+Each layer has clear boundaries and responsibilities.
 
----
+### Pattern 2: Progressive Enhancement
 
-## 🎨 UI/UX Principles
+```
+Core Functionality:
+- Basic code editing (VSCode)
+- Syntax highlighting (VSCode)
+- File management (VSCode)
 
-### 1. **Progressive Disclosure**
+Enhanced with AI:
+- Inline editing (CodeMind)
+- Smart completions (CodeMind)
+- Multi-agent review (CodeMind)
 
-Show simple interface by default, reveal complexity on demand:
-- Basic: Clean chat interface
-- Intermediate: Agent contribution toggle
-- Advanced: Full debug mode with scores and iterations
+Progressive disclosure:
+- Level 1: Just show the code
+- Level 2: Show brief explanation
+- Level 3: Show all agent analyses
+```
 
-### 2. **Visual Feedback for AI Process**
+### Pattern 3: Fail Gracefully
 
-Make invisible AI processes visible:
-- Agent icons with progress indicators
-- N² iteration counter
-- Quality score visualization (optional)
-- Reasoning graph (interactive)
+```typescript
+// Everything has a fallback
+async function generateCode(request: Request): Promise<Response> {
+  try {
+    // Try full 6-agent analysis
+    return await fullAgentAnalysis(request);
+  } catch (error) {
+    try {
+      // Fallback: Use 3 core agents only
+      return await coreAgentAnalysis(request);
+    } catch (error) {
+      try {
+        // Fallback: Single engineer agent
+        return await singleAgentAnalysis(request);
+      } catch (error) {
+        // Final fallback: Show error, offer manual edit
+        return fallbackToManual(request, error);
+      }
+    }
+  }
+}
+```
 
-### 3. **Speed Perception**
+Never show "500 error" to user. Always degrade gracefully.
 
-Make waiting feel faster:
-- Immediate response acknowledgment
-- Streaming partial results
-- Animated transitions
-- Progress indicators
+### Pattern 4: Observability
 
-### 4. **Trust Through Transparency**
-
-Build confidence without overwhelming:
-- Show which agents contributed
-- Indicate when self-correction occurred
-- Provide "show your work" option
-- Cite sources when factual
-
-### 5. **Mobile-First, Desktop-Enhanced**
-
-- Core functionality on mobile
-- Enhanced features on desktop
-- Responsive design throughout
-- Touch-optimized controls
-
----
-
-## 🔒 Security & Privacy Principles
-
-### 1. **Data Minimization**
-
-Collect only what's necessary:
-- No PII unless required
-- Conversation retention policies
-- User-controlled data deletion
-
-### 2. **Encryption Everywhere**
-
-- TLS for all transport
-- Encryption at rest for sensitive data
-- Secure key management
-
-### 3. **Principle of Least Privilege**
-
-- Role-based access control
-- Service-to-service authentication
-- API key rotation
-
-### 4. **Audit Everything**
-
-- Comprehensive audit logs
-- Immutable log storage
-- Compliance reporting
-
----
-
-## 📊 Performance Principles
-
-### 1. **Latency Budget**
-
-Target response times:
-- Initial acknowledgment: <200ms
-- First agent completion: <3s
-- Full synthesis (no N²): <8s
-- With 1 N² iteration: <15s
-
-### 2. **Horizontal Scalability**
-
-- Stateless services
-- Load balancing
-- Auto-scaling based on queue depth
-
-### 3. **Resource Optimization**
-
-- Parallel agent execution
-- Connection pooling
-- Efficient prompt design (token reduction)
-
----
-
-## 🧪 Testing Philosophy
-
-### 1. **Test Layers**
-
-- Unit: Individual functions
-- Integration: Service interactions
-- E2E: Full workflows
-- LLM: Prompt quality and consistency
-
-### 2. **Quality Metrics**
-
-- Response coherence
-- Hallucination detection
+```
+What We Track:
+- Request types and frequency
+- Agent execution times
+- Quality scores (pre and post N²)
 - N² trigger rate
-- Average quality score
-- User satisfaction
+- Error rates by component
+- Cache hit rates
+- User satisfaction (accept/reject rates)
 
-### 3. **Continuous Benchmarking**
+What We DON'T Track (Privacy):
+- Code content
+- File paths
+- User identity (beyond anonymous ID)
+- Sensitive context
+```
 
-- Compare against baseline
-- A/B test prompt variations
-- Track performance over time
-
----
-
-## 🚀 Deployment Principles
-
-### 1. **Infrastructure as Code**
-
-- Docker containers
-- Kubernetes orchestration
-- Terraform for cloud resources
-
-### 2. **CI/CD Pipeline**
-
-- Automated testing
-- Staging environment
-- Blue-green deployment
-- Automatic rollback
-
-### 3. **Observability**
-
-- Structured logging
-- Distributed tracing
-- Metrics and alerting
-- Status dashboard
+**Telemetry Consent**:
+```json
+{
+  "codemind.telemetry.enabled": false, // Default: OFF
+  "codemind.telemetry.level": "minimal", // "none" | "minimal" | "full"
+  "codemind.telemetry.excludePatterns": [
+    "**/secrets/**",
+    "**/.env*"
+  ]
+}
+```
 
 ---
 
-## 📝 Documentation Standards
+## Anti-Patterns to Avoid
 
-### 1. **Code Documentation**
+### ❌ 1. The God Agent
+```typescript
+// BAD: One agent tries to do everything
+class GodAgent {
+  async analyze(code: string) {
+    // Try to check architecture AND security AND performance AND...
+    // Result: Mediocre at everything
+  }
+}
 
-- Docstrings for all public APIs
-- Type hints (Python) / TypeScript interfaces
-- Architecture Decision Records (ADRs)
+// GOOD: Specialized agents
+const analyses = await Promise.all([
+  architectAgent.analyze(code),
+  securityAgent.analyze(code),
+  performanceAgent.analyze(code)
+]);
+```
 
-### 2. **API Documentation**
+### ❌ 2. Premature Optimization
+```typescript
+// BAD: Optimize before measuring
+async function optimized() {
+  // Complex caching logic
+  // Premature parallelization
+  // Micro-optimizations
+  // But... is this even a bottleneck?
+}
 
-- OpenAPI/Swagger specs
-- Interactive API explorer
-- Code examples in multiple languages
+// GOOD: Measure first
+async function measured() {
+  const start = performance.now();
+  await slowOperation();
+  const duration = performance.now() - start;
+  logger.metric('operation_duration', duration);
+  
+  // Now optimize if needed
+}
+```
 
-### 3. **User Documentation**
+### ❌ 3. Hardcoded Prompts
+```typescript
+// BAD: Prompts in code
+const prompt = "You are a security expert. Analyze this code...";
 
-- Quick start guides
-- Tutorial videos
-- Use case examples
-- FAQ and troubleshooting
+// GOOD: Templated prompts
+const prompt = buildPrompt({
+  role: agent.role,
+  perspective: agent.perspective,
+  code,
+  context,
+  repairDirective
+});
+```
+
+### ❌ 4. Ignoring Context
+```typescript
+// BAD: Analyze code in isolation
+async function analyze(code: string) {
+  return llm.generate(`Analyze: ${code}`);
+}
+
+// GOOD: Rich context
+async function analyze(code: string, context: CodeContext) {
+  const prompt = `
+    Analyze this ${context.language} code from ${context.framework}:
+    
+    Related symbols: ${context.symbols.map(s => s.name).join(', ')}
+    Recent changes: ${context.recentChanges[0]?.message}
+    
+    Code:
+    ${code}
+  `;
+  return llm.generate(prompt);
+}
+```
+
+### ❌ 5. Black Box Reasoning
+```typescript
+// BAD: No visibility
+async function generate(code: string) {
+  const result = await blackBox(code);
+  return result; // How did it decide? No idea.
+}
+
+// GOOD: Transparent reasoning
+async function generate(code: string) {
+  const analyses = await collectAnalyses(code);
+  const synthesis = await synthesize(analyses);
+  
+  return {
+    code: synthesis.code,
+    reasoning: {
+      agentAnalyses: analyses,
+      qualityScore: synthesis.score,
+      iterations: synthesis.iterations,
+      keyDecisions: synthesis.decisions
+    }
+  };
+}
+```
 
 ---
 
-## 🌱 Evolution Over Revolution
-
-**Principle:** Improve incrementally, preserve core architecture.
-
-When considering changes:
-1. Does it preserve the hierarchical structure?
-2. Does it maintain or improve self-correction?
-3. Is it backward compatible?
-4. Can it be A/B tested?
-5. Does it align with our core principles?
-
-**Anti-Patterns to Avoid:**
-- ❌ Flattening the hierarchy
-- ❌ Removing quality scoring
-- ❌ Hardcoding configurations
-- ❌ Exposing internal process in main output
-- ❌ Vendor lock-in
-- ❌ Monolithic architecture
-
----
-
-## 🎯 Success Metrics
+## Success Metrics
 
 ### Technical Metrics
-- Average quality score: >9.2/10
-- N² trigger rate: <30%
+
+```
+Quality:
+- Code quality score: >9.0/10 (self-assessed)
 - Hallucination rate: <2%
-- 95th percentile latency: <12s
-- System uptime: >99.9%
+- Bug introduction rate: <5%
+- Security vulnerability detection: >95%
+
+Performance:
+- P50 latency: <3s
+- P95 latency: <6s
+- P99 latency: <10s
+- N² overhead: <2x base latency
+
+Reliability:
+- Uptime: >99.9%
+- Error rate: <0.1%
+- Cache hit rate: >60%
+```
 
 ### User Metrics
-- Response satisfaction: >4.5/5
-- Feature adoption rate
-- Conversation length (engagement)
-- Retention rate
+
+```
+Satisfaction:
+- Accept rate: >80%
+- Modification rate: <15%
+- Reject rate: <5%
+- NPS score: >60
+
+Engagement:
+- Daily active users: Growing
+- Sessions per user: >3/day
+- Retention (30-day): >70%
+- Feature adoption: >50% use advanced features
+```
 
 ### Business Metrics
-- API usage growth
-- Enterprise adoption
-- Community contributions
-- Cost per query
+
+```
+Growth:
+- User signups: 20%+ month-over-month
+- Paid conversions: >15%
+- Churn: <5% monthly
+- Revenue growth: 25%+ month-over-month
+```
 
 ---
 
-**These principles are not rules to be followed blindly, but a philosophy to guide decisions. When in doubt, ask: "Does this make the AI reasoning more human-like, more reliable, and more transparent?"**
+## Evolution Over Revolution
+
+**Principle**: Improve incrementally while preserving core architecture.
+
+When evaluating changes:
+
+1. **Does it preserve hierarchical structure?**
+   - ✓ Adding a new agent at specialist layer
+   - ✗ Removing synthesis layer
+
+2. **Does it maintain self-correction?**
+   - ✓ Improving quality scoring
+   - ✗ Bypassing N² loop for speed
+
+3. **Is it backward compatible?**
+   - ✓ New optional features
+   - ✗ Breaking existing user workflows
+
+4. **Can it be A/B tested?**
+   - ✓ New prompt templates
+   - ✗ Core architecture changes
+
+5. **Does it align with principles?**
+   - ✓ Improving privacy
+   - ✗ Vendor lock-in
+
+**Change Process**:
+```
+1. Propose change
+2. Evaluate against principles
+3. Prototype in branch
+4. Measure impact (A/B test)
+5. Roll out gradually (10% → 50% → 100%)
+6. Monitor metrics
+7. Commit or revert
+```
+
+---
+
+## Conclusion
+
+These principles are not arbitrary rules—they emerge from:
+1. **Research**: MainE1 prototype proved hierarchical + self-correction works
+2. **User needs**: Developers want quality over speed
+3. **Market reality**: We compete on differentiation, not features
+4. **Technical constraints**: LLMs have limitations, architecture compensates
+
+**The Core Insight**:
+*"True code intelligence emerges not from a smarter single AI, but from specialized AIs working in hierarchy, continuously refining through meta-cognitive self-correction."*
+
+This is CodeMind's psychological alpha. Everything else is implementation detail.
+
+---
+
+**When in doubt, ask**: "Does this make CodeMind more like how senior developers actually think about code?"
+
+If yes → Probably aligned with principles  
+If no → Probably not aligned with principles
