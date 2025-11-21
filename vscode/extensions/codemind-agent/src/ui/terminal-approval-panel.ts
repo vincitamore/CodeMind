@@ -82,6 +82,37 @@ export class TerminalApprovalPanel {
       this.updateContent();
     }
   }
+  
+  /**
+   * Check if terminal panel is currently active/visible
+   */
+  hasActivePanel(): boolean {
+    return this.panel !== undefined && this.panel.visible;
+  }
+  
+  /**
+   * Wait for user to close the terminal panel (for reviewing output)
+   */
+  async waitForUserToClose(): Promise<void> {
+    return new Promise<void>((resolve) => {
+      if (!this.panel) {
+        resolve();
+        return;
+      }
+      
+      // Set up a listener for panel disposal
+      const disposable = this.panel.onDidDispose(() => {
+        disposable.dispose();
+        resolve();
+      });
+      
+      // Also add a max timeout (2 minutes)
+      setTimeout(() => {
+        disposable.dispose();
+        resolve();
+      }, 120000);
+    });
+  }
 
   private createOrShowPanel() {
     if (this.panel) {
@@ -474,7 +505,14 @@ export class TerminalApprovalPanel {
         <button class="btn btn-danger" onclick="reject()">Reject</button>
         <button class="btn btn-primary" onclick="approve()">Run Command</button>
       ` : isComplete ? `
-        <button class="btn btn-secondary" onclick="close()">Close</button>
+        <div style="display: flex; flex-direction: column; gap: 12px; align-items: center; width: 100%;">
+          <div style="color: var(--vscode-descriptionForeground); font-size: 13px; text-align: center;">
+            ${isSuccess ? '✅' : '⚠️'} Command ${isSuccess ? 'completed successfully' : 'failed'}. Review the output above, then click Close to continue.
+          </div>
+          <button class="btn ${isSuccess ? 'btn-primary' : 'btn-secondary'}" onclick="close()" style="font-size: 14px; padding: 10px 24px; font-weight: 600;">
+            Close & Continue to Next Step →
+          </button>
+        </div>
       ` : ''}
     </div>
   </div>

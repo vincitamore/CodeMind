@@ -634,9 +634,13 @@ async function handleOrchestratorRequest(userRequest: string, mentionedFiles: st
           const tap = terminalApprovalPanel;
           
           try {
+            const cwd = step.operation.workingDirectory || workspaceContext.workspaceRoot;
+            console.log(`[Orchestrator] Working directory: ${cwd}`);
+            console.log(`[Orchestrator] Workspace root: ${workspaceContext.workspaceRoot}`);
+            
             const terminalCommand = {
               command,
-              cwd: step.operation.workingDirectory || workspaceContext.workspaceRoot,
+              cwd,
               reason: step.rationale,
               timeout: 600000 // 10 minutes default timeout
             };
@@ -658,6 +662,11 @@ async function handleOrchestratorRequest(userRequest: string, mentionedFiles: st
               
               const duration = Date.now() - startTime;
               tap.markComplete(result.exitCode || 0, duration);
+              
+              // CRITICAL: Wait for user to review and close the terminal panel before proceeding
+              console.log(`[Orchestrator] ⏸️  Waiting for user to review terminal output and click "Close"...`);
+              await tap.waitForUserToClose();
+              console.log(`[Orchestrator] ✅ Terminal panel closed, proceeding to next step...`);
               
               // Store terminal output in workspace context for model feedback
               const terminalOutput = {
