@@ -544,7 +544,21 @@ async function handleApplyChanges(messageId: string) {
 
     const { plan, generationResults } = message.metadata.sessionData as any;
     
-    // Show confirmation
+    // Check if files were already applied immediately
+    const appliedImmediately = generationResults.every((r: any) => r.appliedImmediately);
+    
+    if (appliedImmediately) {
+      // Files already written - this is an ACCEPT
+      chatSidebarProvider.addMessage({
+        role: 'system',
+        content: `✅ Changes accepted! ${generationResults.length} file(s) have been saved to disk.`
+      });
+      
+      vscode.window.showInformationMessage(`CodeMind: Changes accepted (${generationResults.length} files)`);
+      return;
+    }
+
+    // Files not applied yet - show confirmation and apply now
     const confirmation = await vscode.window.showInformationMessage(
       `Apply changes to ${message.metadata.filesAffected.length} file(s)?`,
       { modal: true },
@@ -671,18 +685,103 @@ async function handleApplyChanges(messageId: string) {
 
 /**
  * Handle reject changes request
+ * If files were applied immediately: ROLLBACK (delete created files, restore backups)
+ * If files were not applied: just confirm rejection (nothing to undo)
  */
 async function handleRejectChanges(messageId: string) {
   if (!chatSidebarProvider) {
     return;
   }
 
-  chatSidebarProvider.addMessage({
-    role: 'system',
-    content: '❌ Changes rejected. The proposed changes will not be applied.'
-  });
+  try {
+    const session = chatSidebarProvider.getCurrentSession();
+    const message = session.messages.find(m => m.id === messageId);
+    
+    if (!message || !message.metadata?.sessionData) {
+      chatSidebarProvider.addMessage({
+        role: 'system',
+        content: '❌ Changes rejected. No changes were made.'
+      });
+      return;
+    }
 
-  vscode.window.showInformationMessage('CodeMind: Changes rejected');
+    const { generationResults } = message.metadata.sessionData as any;
+    
+    // Check if files were already applied immediately
+    const appliedImmediately = generationResults.some((r: any) => r.appliedImmediately);
+    
+    if (!appliedImmediately) {
+      // Files never written - simple rejection
+      chatSidebarProvider.addMessage({
+        role: 'system',
+        content: '❌ Changes rejected. The proposed changes will not be applied.'
+      });
+      vscode.window.showInformationMessage('CodeMind: Changes rejected');
+      return;
+    }
+
+    // Files were written - need to rollback
+    const confirmation = await vscode.window.showWarningMessage(
+      `Rollback changes to ${generationResults.length} file(s)? This will delete created files and restore backups.`,
+      { modal: true },
+      'Rollback', 'Keep Changes'
+    );
+
+    if (confirmation !== 'Rollback') {
+      chatSidebarProvider.addMessage({
+        role: 'system',
+        content: '✅ Rollback cancelled. Changes will be kept.'
+      });
+      return;
+    }
+
+    // Perform rollback
+    const fs = require('fs').promises;
+    const path = require('path');
+    const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '';
+    
+    let deleted = 0;
+    let restored = 0;
+    
+    for (const result of generationResults) {
+      if (!result.appliedImmediately) continue;
+      
+      const absolutePath = path.isAbsolute(result.filePath)
+        ? result.filePath
+        : path.join(workspaceRoot, result.filePath);
+      
+      try {
+        if (result.backupContent !== undefined) {
+          // File existed before - restore backup
+          await fs.writeFile(absolutePath, result.backupContent, 'utf8');
+          restored++;
+          console.log(`[CodeMind] Restored: ${result.filePath}`);
+        } else {
+          // File was newly created - delete it
+          await fs.unlink(absolutePath);
+          deleted++;
+          console.log(`[CodeMind] Deleted: ${result.filePath}`);
+        }
+      } catch (error: any) {
+        console.error(`[CodeMind] Rollback failed for ${result.filePath}:`, error);
+      }
+    }
+    
+    chatSidebarProvider.addMessage({
+      role: 'system',
+      content: `🔄 Rollback complete!\n- Deleted ${deleted} new file(s)\n- Restored ${restored} modified file(s)`
+    });
+    
+    vscode.window.showInformationMessage(`CodeMind: Rolled back changes (${deleted} deleted, ${restored} restored)`);
+    
+  } catch (error: any) {
+    console.error('[CodeMind] Rollback failed:', error);
+    chatSidebarProvider.addMessage({
+      role: 'system',
+      content: `❌ Rollback failed: ${error.message}`
+    });
+    vscode.window.showErrorMessage(`CodeMind: Rollback failed - ${error.message}`);
+  }
 }
 
 export function deactivate() {

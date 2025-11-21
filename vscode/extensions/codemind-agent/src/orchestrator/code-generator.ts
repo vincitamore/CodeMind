@@ -30,6 +30,8 @@ export interface FileGenerationResult {
   converged: boolean;
   iterations: number;
   insights: string[];
+  appliedImmediately?: boolean;  // Track if file was already written
+  backupContent?: string;  // Backup of original content for rollback
 }
 
 /**
@@ -91,12 +93,23 @@ export class CodeGenerator {
               ? result.filePath
               : path.join(workspaceRoot, result.filePath);
             
+            // Backup existing file if it exists (for rollback support)
+            try {
+              const existingContent = await fs.readFile(absolutePath, 'utf8');
+              result.backupContent = existingContent;
+              console.log(`[CodeGenerator] Backed up existing file: ${result.filePath}`);
+            } catch (err) {
+              // File doesn't exist - that's fine for create operations
+              result.backupContent = undefined;
+            }
+            
             // Ensure directory exists
             const dir = path.dirname(absolutePath);
             await fs.mkdir(dir, { recursive: true });
             
             // Write file
             await fs.writeFile(absolutePath, result.generatedContent, 'utf8');
+            result.appliedImmediately = true;
             
             console.log(`[CodeGenerator] ✅ Immediately applied: ${result.filePath} → ${absolutePath}`);
             console.log(`[CodeGenerator] Wrote ${result.generatedContent.length} chars to file`);
@@ -109,6 +122,7 @@ export class CodeGenerator {
             });
           } catch (error) {
             console.error(`[CodeGenerator] Failed to immediately apply ${result.filePath}:`, error);
+            result.appliedImmediately = false;
             // Don't fail the whole operation, just log the error
           }
         }
