@@ -411,11 +411,16 @@ For each file that needs to be changed:
 4. What risks it involves
 5. Priority/order (lower number = earlier)
 
+CRITICAL - Two types of files:
+1. **affectedFiles**: Files that will be MODIFIED/CREATED/DELETED by this operation
+2. **requiredFiles**: Files needed for CONTEXT (imports, types, related code that agents should read to understand the codebase)
+
 Consider:
-- Dependencies between files (imports, references)
+- Dependencies between files (imports, references) → Add to requiredFiles
 - Order of operations (create before modify, etc.)
 - Rollback strategy (how to undo if something fails)
 - Verification (how to check if changes work)
+- What existing code do agents need to see? → Add to requiredFiles
 
 ## Response Format:
 Return ONLY valid JSON (no markdown code fences, no extra text):
@@ -479,7 +484,7 @@ EXAMPLE:
       "agentInputs": []
     }
   ],
-  "requiredFiles": ["src/utils/index.ts"],
+  "requiredFiles": ["src/utils/index.ts", "src/types.ts"],
   "affectedFiles": ["src/utils/helper.ts", "tests/helper.test.ts"],
   "estimatedComplexity": "medium",
   "risks": ["May need to update imports in other files"],
@@ -491,7 +496,11 @@ EXAMPLE:
   "confidence": 0.85
 }
 
-⚠️ REMINDER: Keep "content" fields SHORT. Full code generation happens in a later phase!`;
+⚠️ REMINDER: 
+- Keep "content" fields SHORT. Full code generation happens in a later phase!
+- "requiredFiles" = Files agents should READ for context (imports, types, related code)
+- "affectedFiles" = Files that will be MODIFIED/CREATED (automatically populated from steps)
+- Think: "What files do agents need to understand the codebase?" → requiredFiles`;
 
     return prompt;
   }
