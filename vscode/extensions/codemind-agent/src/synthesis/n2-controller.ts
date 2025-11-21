@@ -80,6 +80,15 @@ export class N2Controller {
         
         history.push(iteration);
         
+        // Validate quality score
+        if (typeof iteration.qualityScore !== 'number' || isNaN(iteration.qualityScore) || iteration.qualityScore < 0) {
+          console.error(`[N²] ✗ Invalid quality score: ${iteration.qualityScore}`);
+          console.error(`[N²] Synthesis result:`, iteration.synthesis);
+          // Use a fallback quality score based on success
+          iteration.qualityScore = iteration.synthesis.success ? 7.0 : 3.0;
+          console.log(`[N²] Using fallback quality score: ${iteration.qualityScore}/10`);
+        }
+        
         // Track best result and check for improvement
         const previousBestScore = bestScore;
         const improved = iteration.qualityScore > bestScore + 0.1; // Improvement threshold
@@ -126,10 +135,30 @@ export class N2Controller {
         
         // Check convergence
         if (iteration.qualityScore >= this.qualityThreshold && iteration.synthesis.success) {
-          console.log(`[N²] ✓ Quality threshold met: ${iteration.qualityScore}/10`);
+          console.log(`[N²] ✓ Quality threshold met: ${iteration.qualityScore.toFixed(1)}/10`);
           console.log(`[N²] Converged in ${iterationNum} iteration(s)`);
           
-          return bestResult || this.createFailureResult(history, startTime, 'No successful iteration');
+          // Ensure we have a result with code
+          if (bestResult && bestResult.finalCode) {
+            return bestResult;
+          } else {
+            console.warn(`[N²] Quality met but no code generated, using current iteration`);
+            return {
+              success: true,
+              finalCode: iteration.synthesis.code || '',
+              explanation: iteration.synthesis.explanation || 'Code generated',
+              qualityScore: iteration.qualityScore,
+              iterations: history,
+              totalTime: Date.now() - startTime,
+              converged: true,
+              keyDecisions: iteration.synthesis.keyDecisions || {
+                architecture: '',
+                security: '',
+                performance: '',
+                testing: ''
+              }
+            };
+          }
         }
         
         // Check if we have repair directive for next iteration

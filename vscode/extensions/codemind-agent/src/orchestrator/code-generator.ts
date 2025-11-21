@@ -129,26 +129,63 @@ export class CodeGenerator {
     // Convert agents map to array
     const agentsArray = Array.from(this.agents.values());
 
-    // Run N² loop with 5 minute timeout per file
-    const result: N2Result = await Promise.race([
-      n2Controller.execute(
-        instruction,
-        agentsArray,
-        synthesizer,
-        codeContext,
-        this.classifyOperationType(operation.type)
-      ),
-      this.createTimeout(300000, 'Code generation exceeded 5 minute timeout')
-    ]) as N2Result;
+    // Run N² loop with 10 minute timeout per file (complex code needs time!)
+    let result: N2Result;
+    try {
+      result = await Promise.race([
+        n2Controller.execute(
+          instruction,
+          agentsArray,
+          synthesizer,
+          codeContext,
+          this.classifyOperationType(operation.type)
+        ),
+        this.createTimeout(600000, 'Code generation exceeded 10 minute timeout')
+      ]) as N2Result;
+    } catch (error: any) {
+      console.error(`[CodeGenerator] Timeout or error for ${filePath}:`, error.message);
+      // Return a failure result instead of throwing
+      return {
+        filePath,
+        operation,
+        generatedContent: '',
+        quality: 0,
+        converged: false,
+        iterations: 0,
+        insights: [`Timeout: ${error.message}`]
+      };
+    }
+
+    // Validate result
+    if (!result || !result.iterations || result.iterations.length === 0) {
+      console.error(`[CodeGenerator] Invalid N² result for ${filePath}`);
+      return {
+        filePath,
+        operation,
+        generatedContent: '',
+        quality: 0,
+        converged: false,
+        iterations: 0,
+        insights: ['Invalid N² result']
+      };
+    }
 
     const lastIteration = result.iterations[result.iterations.length - 1];
     const keyDecisions = lastIteration?.synthesis?.keyDecisions;
     
+    // Even if not converged, return what we have
+    const quality = typeof result.qualityScore === 'number' ? result.qualityScore : 0;
+    const code = result.finalCode || '';
+    
+    if (!code) {
+      console.warn(`[CodeGenerator] No code generated for ${filePath} (quality: ${quality})`);
+    }
+    
     return {
       filePath,
       operation,
-      generatedContent: result.finalCode || '',
-      quality: result.qualityScore,
+      generatedContent: code,
+      quality,
       converged: result.converged,
       iterations: result.iterations.length,
       insights: keyDecisions ? Object.values(keyDecisions).filter(v => typeof v === 'string') : []
