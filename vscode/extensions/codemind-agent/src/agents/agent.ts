@@ -154,9 +154,30 @@ export abstract class Agent {
    * Shows full file with clear markers around the user's selection
    */
   protected formatCodeWithSelection(context: CodeContext): string {
+    let result = '';
+    
+    // CRITICAL: Include related files FIRST for context
+    if (context.relatedFiles && context.relatedFiles.length > 0) {
+      result += `📁 RELATED FILES FOR CONTEXT (${context.relatedFiles.length}):\n`;
+      result += `(These files provide important context about the project structure, dependencies, and requirements)\n\n`;
+      
+      context.relatedFiles.forEach((file, index) => {
+        const preview = file.content.length > 2000 
+          ? file.content.substring(0, 2000) + '\n\n... (truncated, ' + file.content.length + ' total chars) ...'
+          : file.content;
+        
+        result += `--- Related File ${index + 1}: ${file.path} (${file.language}) ---\n`;
+        result += preview + '\n\n';
+      });
+      
+      result += `--- End of Related Files ---\n\n`;
+      result += `📝 NOW ANALYZING TARGET FILE:\n\n`;
+    }
+    
     if (!context.selectionRange) {
       // Fallback for old format
-      return `File: ${context.filePath}\nLanguage: ${context.language}\n\n${context.code}`;
+      result += `File: ${context.filePath}\nLanguage: ${context.language}\n\n${context.code}`;
+      return result;
     }
     
     const { selectionRange } = context;
@@ -164,7 +185,7 @@ export abstract class Agent {
     const startLine = selectionRange.start.line;
     const endLine = selectionRange.end.line;
     
-    let result = `File: ${context.filePath}\nLanguage: ${context.language}\n\n`;
+    result += `File: ${context.filePath}\nLanguage: ${context.language}\n\n`;
     
     // Add diagnostics section if available
     if (context.diagnostics && context.diagnostics.length > 0) {
