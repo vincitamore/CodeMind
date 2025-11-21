@@ -547,10 +547,8 @@ SUCCESS = Your raw response written directly to file (3000+ chars for documents)
       }
     };
     
-    // CRITICAL: Extract code if it's still wrapped in markdown (safety net)
-    if (result.code) {
-      result.code = extractCode(result.code, context.language);
-    }
+    // NO extraction - raw response is the actual file content!
+    // We explicitly instructed the LLM to output raw content, not wrapped in code blocks
     
     return result;
   }

@@ -99,6 +99,7 @@ export class CodeGenerator {
             await fs.writeFile(absolutePath, result.generatedContent, 'utf8');
             
             console.log(`[CodeGenerator] ✅ Immediately applied: ${result.filePath} → ${absolutePath}`);
+            console.log(`[CodeGenerator] Wrote ${result.generatedContent.length} chars to file`);
             
             progressCallback?.({
               phase: 'generating',
@@ -215,6 +216,8 @@ export class CodeGenerator {
     
     if (!code) {
       console.warn(`[CodeGenerator] No code generated for ${filePath} (quality: ${quality})`);
+    } else {
+      console.log(`[CodeGenerator] Generated ${code.length} chars for ${filePath}`);
     }
     
     return {
