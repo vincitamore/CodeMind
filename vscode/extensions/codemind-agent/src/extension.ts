@@ -480,6 +480,36 @@ async function handleOrchestratorRequest(userRequest: string, mentionedFiles: st
       }
     );
 
+    // Phase 2.5: Load additional context files identified by analysis
+    if (taskAnalysis.requiredContext && taskAnalysis.requiredContext.length > 0) {
+      chatSidebarProvider.updateMessage(thinkingId, {
+        content: `📂 Loading additional context files identified by analysis...`
+      });
+
+      console.log(`[Orchestrator] Analysis identified ${taskAnalysis.requiredContext.length} additional context file(s):`, taskAnalysis.requiredContext);
+      
+      try {
+        const additionalFiles = await contextManager.loadFiles(taskAnalysis.requiredContext);
+        
+        // Merge with existing mentioned files
+        if (!workspaceContext.mentionedFiles) {
+          workspaceContext.mentionedFiles = [];
+        }
+        
+        // Add only files that aren't already in mentionedFiles
+        const existingPaths = new Set(workspaceContext.mentionedFiles.map(f => f.path));
+        for (const file of additionalFiles) {
+          if (!existingPaths.has(file.path)) {
+            workspaceContext.mentionedFiles.push(file);
+            console.log(`[Orchestrator] Added analysis-requested file to context: ${file.path}`);
+          }
+        }
+      } catch (error) {
+        console.error(`[Orchestrator] Failed to load analysis-requested context files:`, error);
+        // Continue anyway - planning can proceed with available context
+      }
+    }
+
     // Phase 3: Plan operations
     chatSidebarProvider.updateMessage(thinkingId, {
       content: '📋 Planning file operations...'

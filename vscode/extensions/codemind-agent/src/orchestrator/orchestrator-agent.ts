@@ -279,6 +279,34 @@ Structure:
 `;
     }
 
+    // Show available project files so AI can identify what else it needs
+    if (workspaceContext.projectFiles && workspaceContext.projectFiles.length > 0) {
+      prompt += `\n## 📂 Workspace File Structure:\n`;
+      const relevantFiles = workspaceContext.projectFiles
+        .filter(f => !f.includes('node_modules') && !f.includes('.git') && !f.includes('out'))
+        .slice(0, 50);  // Limit to first 50 relevant files
+      prompt += relevantFiles.join('\n') + '\n';
+      if (workspaceContext.projectFiles.length > relevantFiles.length) {
+        prompt += `... (${workspaceContext.projectFiles.length - relevantFiles.length} more files)\n`;
+      }
+      prompt += `\n`;
+    }
+
+    // CRITICAL: Include mentioned files for context
+    if (workspaceContext.mentionedFiles && workspaceContext.mentionedFiles.length > 0) {
+      prompt += `\n## 📁 User-Mentioned Files (CRITICAL CONTEXT):\n`;
+      prompt += `The user explicitly referenced these files with @ mentions. READ THEM CAREFULLY:\n\n`;
+      
+      workspaceContext.mentionedFiles.forEach((file, index) => {
+        const preview = file.content.length > 3000 
+          ? file.content.substring(0, 3000) + '\n\n... (truncated, total: ' + file.content.length + ' chars) ...'
+          : file.content;
+        
+        prompt += `### File ${index + 1}: ${file.path}\n`;
+        prompt += `\`\`\`${file.language}\n${preview}\n\`\`\`\n\n`;
+      });
+    }
+
     prompt += `
 ## Your Task:
 Analyze the user's request and determine:
@@ -301,8 +329,11 @@ Analyze the user's request and determine:
    - multi-file: 2-5 files
    - project-wide: 6+ files or structural changes
 
-4. **Required Context**: What files/information do you need to complete this task?
-   List specific file paths if known, or patterns like "*.config.ts" or "all test files"
+4. **Required Context**: What ADDITIONAL files do you need to complete this task?
+   - Look at the "Workspace File Structure" above
+   - Identify files that provide necessary context (e.g., if user mentions implementation-plan.md, you should also request tech-spec.md, package.json, etc.)
+   - List specific file paths from the workspace
+   - These files will be loaded and provided to you in the planning step
 
 5. **Complexity**: How complex is this task?
    - low: Simple, straightforward change
@@ -359,6 +390,21 @@ Line 3"`;
 
 ## Workspace Context:
 `;
+
+    // CRITICAL: Include mentioned files FIRST - they define the project!
+    if (workspaceContext.mentionedFiles && workspaceContext.mentionedFiles.length > 0) {
+      prompt += `\n### 📁 USER-MENTIONED FILES (CRITICAL - READ THESE FIRST!):\n`;
+      prompt += `These files were explicitly referenced by the user and contain ESSENTIAL context about the project:\n\n`;
+      
+      workspaceContext.mentionedFiles.forEach((file, index) => {
+        const preview = file.content.length > 3000 
+          ? file.content.substring(0, 3000) + '\n\n... (truncated, total: ' + file.content.length + ' chars) ...'
+          : file.content;
+        
+        prompt += `#### Mentioned File ${index + 1}: ${file.path}\n`;
+        prompt += `\`\`\`${file.language}\n${preview}\n\`\`\`\n\n`;
+      });
+    }
 
     if (workspaceContext.currentFile) {
       prompt += `### Current File: ${workspaceContext.currentFile.path}
