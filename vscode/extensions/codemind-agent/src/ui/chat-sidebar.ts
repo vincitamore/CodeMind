@@ -39,6 +39,13 @@ export interface ChatMessage {
     quality?: number;
     sessionData?: any; // Stores plan and generation results for apply/reject
     mentions?: string[]; // Files mentioned with @
+    retryData?: {      // Terminal retry data
+      originalRequest: string;
+      originalPlan: any;
+      terminalResults: any[];
+      workspaceContext: any;
+      planMessageId: string;
+    };
   };
 }
 
@@ -123,6 +130,12 @@ export class ChatSidebarProvider implements vscode.WebviewViewProvider {
           break;
         case 'rejectChanges':
           this.handleRejectChanges(data.messageId);
+          break;
+        case 'retryTerminal':
+          this.handleRetryTerminal(data);
+          break;
+        case 'skipRetry':
+          this.handleSkipRetry(data.messageId);
           break;
         default:
           // Check custom handlers
@@ -281,6 +294,26 @@ export class ChatSidebarProvider implements vscode.WebviewViewProvider {
     if (handler) {
       handler({ messageId });
     }
+  }
+
+  /**
+   * Handle retry terminal request
+   */
+  private handleRetryTerminal(data: any) {
+    const handler = this._messageHandlers.get('retryTerminal');
+    if (handler) {
+      handler(data);
+    }
+  }
+
+  /**
+   * Handle skip retry request
+   */
+  private handleSkipRetry(messageId: string) {
+    // Just acknowledge - remove the retry prompt
+    this.updateMessage(messageId, {
+      content: this._currentSession.messages.find(m => m.id === messageId)?.content + '\n\n_User chose to skip retry._'
+    });
   }
 
   /**
@@ -816,6 +849,15 @@ export class ChatSidebarProvider implements vscode.WebviewViewProvider {
         \`;
       }
 
+      if (message.role === 'system' && message.metadata?.retryData) {
+        html += \`
+          <div class="message-actions">
+            <button class="action-button primary" data-action="retry" data-message-id="\${message.id}">🔄 Analyze & Retry</button>
+            <button class="action-button" data-action="skip" data-message-id="\${message.id}">Skip</button>
+          </div>
+        \`;
+      }
+
       div.innerHTML = html;
       return div;
     }
@@ -836,6 +878,17 @@ export class ChatSidebarProvider implements vscode.WebviewViewProvider {
             break;
           case 'viewDiff':
             vscode.postMessage({ type: 'viewDiff', messageId });
+            break;
+          case 'retry':
+            vscode.postMessage({ type: 'retryTerminal', messageId });
+            // Disable button to prevent double-click
+            button.disabled = true;
+            button.textContent = '🔄 Analyzing...';
+            break;
+          case 'skip':
+            vscode.postMessage({ type: 'skipRetry', messageId });
+            // Remove the action buttons
+            button.parentElement.remove();
             break;
         }
       }

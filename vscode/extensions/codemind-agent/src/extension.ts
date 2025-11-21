@@ -138,6 +138,11 @@ export function activate(context: vscode.ExtensionContext) {
     await handleRejectChanges(data.messageId);
   });
   
+  // Handle terminal retry
+  chatSidebarProvider.onMessage('retryTerminal', async (data) => {
+    await handleTerminalRetry(data.messageId);
+  });
+  
   // Register inline edit command
   const inlineEdit = vscode.commands.registerCommand(
     'codemind.inlineEdit',
@@ -723,22 +728,25 @@ async function handleOrchestratorRequest(userRequest: string, mentionedFiles: st
       if (failedCommands.length > 0) {
         console.log(`[Orchestrator] Detected ${failedCommands.length} failed terminal command(s)`);
         
-        chatSidebarProvider.addMessage({
+        const retryMessageId = chatSidebarProvider.addMessage({
           role: 'system',
           content: `⚠️ **${failedCommands.length} terminal command(s) failed.**\n\n` +
                    `The Orchestrator can analyze the errors and suggest fixes.\n\n` +
                    `Failed commands:\n${failedCommands.map((c: any) => `- \`${c.command}\` (exit code ${c.exitCode})`).join('\n')}\n\n` +
-                   `Would you like me to analyze the errors and attempt to fix them?`
+                   `Would you like me to analyze the errors and attempt to fix them?`,
+          metadata: {
+            retryData: {
+              originalRequest: userRequest,
+              originalPlan: plan,
+              terminalResults,
+              workspaceContext,
+              planMessageId
+            }
+          }
         });
         
-        // TODO: Implement interactive retry flow
-        // - User confirms they want retry
-        // - Pass terminal results to Orchestrator for analysis
-        // - Orchestrator creates recovery plan
-        // - Execute recovery plan
-        // This is part of the "iterative refinement" feature
-        
-        console.log(`[Orchestrator] Terminal failure recovery not yet implemented. Continuing with available results...`);
+        // Interactive retry will be triggered by user clicking button
+        console.log(`[Orchestrator] Waiting for user decision on terminal retry (message: ${retryMessageId})...`);
       } else if (terminalResults.length > 0) {
         console.log(`[Orchestrator] All ${terminalResults.length} terminal command(s) succeeded`);
         chatSidebarProvider.addMessage({
@@ -1076,6 +1084,88 @@ async function handleRejectChanges(messageId: string) {
       content: `❌ Rollback failed: ${error.message}`
     });
     vscode.window.showErrorMessage(`CodeMind: Rollback failed - ${error.message}`);
+  }
+}
+
+/**
+ * Handle terminal retry request
+ * Analyze failed terminal commands and execute recovery plan
+ */
+async function handleTerminalRetry(messageId: string) {
+  if (!chatSidebarProvider || !orchestratorAgent || !contextManager || !codeGenerator || !terminalManager || !terminalApprovalPanel) {
+    vscode.window.showErrorMessage('CodeMind: System not initialized');
+    return;
+  }
+
+  try {
+    // Get the retry data from the message metadata
+    const message = chatSidebarProvider.getCurrentSession().messages.find(m => m.id === messageId);
+    if (!message || !message.metadata?.retryData) {
+      vscode.window.showErrorMessage('CodeMind: Retry data not found');
+      return;
+    }
+
+    const { originalRequest, originalPlan, terminalResults, workspaceContext, planMessageId } = message.metadata.retryData;
+
+    // Update message to show we're analyzing
+    chatSidebarProvider.updateMessage(messageId, {
+      content: message.content + '\n\n🔄 Analyzing failures and creating recovery plan...'
+    });
+
+    console.log('[Orchestrator] Starting terminal failure analysis...');
+
+    // Analyze failures and get recovery plan
+    const analysis = await orchestratorAgent.analyzeTerminalFailures(
+      originalRequest,
+      originalPlan,
+      terminalResults,
+      workspaceContext,
+      (event) => {
+        chatSidebarProvider?.updateMessage(messageId, {
+          content: message.content + `\n\n🔄 ${event.status} (${event.progress}%)`
+        });
+      }
+    );
+
+    console.log('[Orchestrator] Analysis complete:', analysis);
+
+    if (!analysis.needsRetry) {
+      chatSidebarProvider.updateMessage(messageId, {
+        content: message.content + `\n\n✅ Analysis complete:\n${analysis.analysis}\n\n_No retry needed - failures are not recoverable._`
+      });
+      return;
+    }
+
+    // Show analysis results
+    chatSidebarProvider.addMessage({
+      role: 'assistant',
+      content: `## 🔍 Terminal Failure Analysis\n\n${analysis.analysis}\n\n` +
+               (analysis.recoveryPlan ? 
+                 `I've created a recovery plan to fix these issues.\n\n` +
+                 `### Recovery Steps:\n${analysis.recoveryPlan.summary}` :
+                 `_Recovery plan generation is still in development. Manual intervention may be required._`)
+    });
+
+    if (analysis.recoveryPlan) {
+      // TODO: Execute the recovery plan
+      // This would recursively call handleOrchestratorRequest with the recovery plan
+      chatSidebarProvider.addMessage({
+        role: 'system',
+        content: '💡 _Automatic recovery plan execution coming soon!_\n\nFor now, please manually apply the suggested fixes.'
+      });
+    }
+
+    chatSidebarProvider.updateMessage(messageId, {
+      content: message.content + '\n\n✅ Analysis complete. See details below.'
+    });
+
+  } catch (error: any) {
+    console.error('[Orchestrator] Terminal retry failed:', error);
+    chatSidebarProvider?.addMessage({
+      role: 'system',
+      content: `❌ Error during retry analysis: ${error.message}`
+    });
+    vscode.window.showErrorMessage(`CodeMind: Terminal retry failed - ${error.message}`);
   }
 }
 
