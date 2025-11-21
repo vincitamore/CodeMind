@@ -45,11 +45,13 @@ export class CodeGenerator {
 
   /**
    * Generate code for all files in the execution plan
+   * @param applyImmediately - If true, write files as soon as they're generated (better UX)
    */
   async generateCode(
     plan: ExecutionPlan,
     userRequest: string,
-    progressCallback?: OrchestratorProgressCallback
+    progressCallback?: OrchestratorProgressCallback,
+    applyImmediately: boolean = false
   ): Promise<FileGenerationResult[]> {
     const results: FileGenerationResult[] = [];
     const totalSteps = plan.steps.length;
@@ -75,6 +77,34 @@ export class CodeGenerator {
       try {
         const result = await this.generateFileCode(step, userRequest, plan);
         results.push(result);
+
+        // Optionally apply immediately for better UX (user sees files appear during generation)
+        if (applyImmediately && result.converged && result.generatedContent) {
+          try {
+            const vscode = require('vscode');
+            const path = require('path');
+            const fs = require('fs').promises;
+            
+            // Ensure directory exists
+            const dir = path.dirname(result.filePath);
+            await fs.mkdir(dir, { recursive: true });
+            
+            // Write file
+            await fs.writeFile(result.filePath, result.generatedContent, 'utf8');
+            
+            console.log(`[CodeGenerator] ✅ Immediately applied: ${result.filePath}`);
+            
+            progressCallback?.({
+              phase: 'generating',
+              status: `✅ Created ${step.filePath}`,
+              progress,
+              currentFile: step.filePath
+            });
+          } catch (error) {
+            console.error(`[CodeGenerator] Failed to immediately apply ${result.filePath}:`, error);
+            // Don't fail the whole operation, just log the error
+          }
+        }
       } catch (error) {
         console.error(`[CodeGenerator] Failed to generate ${step.filePath}:`, error);
         // Continue with other files

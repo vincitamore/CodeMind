@@ -518,13 +518,14 @@ async function handleApplyChanges(messageId: string) {
     const session = chatSidebarProvider.getCurrentSession();
     const message = session.messages.find(m => m.id === messageId);
     
-    if (!message || !message.metadata?.filesAffected) {
+    if (!message || !message.metadata?.filesAffected || !message.metadata?.sessionData) {
       vscode.window.showWarningMessage('CodeMind: No changes to apply');
       return;
     }
 
-    // TODO: Get the execution plan and file operations from the message
-    // For now, show a confirmation
+    const { plan, generationResults } = message.metadata.sessionData as any;
+    
+    // Show confirmation
     const confirmation = await vscode.window.showInformationMessage(
       `Apply changes to ${message.metadata.filesAffected.length} file(s)?`,
       { modal: true },
@@ -539,18 +540,99 @@ async function handleApplyChanges(messageId: string) {
       return;
     }
 
-    // TODO: Execute file operations using file manager
-    // For now, show success
-    chatSidebarProvider.addMessage({
+    // Add progress message
+    const progressMsgId = chatSidebarProvider.addMessage({
       role: 'system',
-      content: '✅ Changes applied successfully!\n\n' +
-        `Modified ${message.metadata.filesAffected.length} file(s).\n` +
-        'Note: Full implementation of file application is in progress.'
+      content: '⏳ Applying changes...'
     });
 
-    vscode.window.showInformationMessage('CodeMind: Changes applied successfully!');
+    // Build file operations with generated content
+    const operations = (generationResults as any[])
+      .filter((r: any) => r.converged && r.generatedContent)
+      .map((r: any) => ({
+        ...r.operation,
+        content: r.generatedContent
+      }));
+
+    if (operations.length === 0) {
+      chatSidebarProvider.updateMessage(progressMsgId, {
+        content: '⚠️ No valid operations to apply'
+      });
+      return;
+    }
+
+    // Execute as atomic transaction
+    let successCount = 0;
+    let failCount = 0;
+    const errors: string[] = [];
+
+    try {
+      fileManager.beginTransaction(operations);
+      
+      const results = await fileManager.executeTransaction((current, total, op) => {
+        chatSidebarProvider?.updateMessage(progressMsgId, {
+          content: `⏳ Applying changes... (${current}/${total})\n\nCurrent: ${op.type} ${op.filePath}`
+        });
+      });
+
+      // Count successes and failures
+      results.forEach((r: any) => {
+        if (r.success) {
+          successCount++;
+          console.log(`[CodeMind] ✅ Applied ${r.operation.type}: ${r.operation.filePath}`);
+        } else {
+          failCount++;
+          errors.push(`${r.operation.filePath}: ${r.error}`);
+          console.error(`[CodeMind] ❌ Failed ${r.operation.filePath}:`, r.error);
+        }
+      });
+    } catch (error: any) {
+      // Transaction failed and was rolled back
+      failCount = operations.length;
+      errors.push(`Transaction failed: ${error.message}`);
+      console.error('[CodeMind] Transaction failed:', error);
+    }
+
+    // Update progress message with results
+    let resultContent = '';
+    if (successCount > 0) {
+      resultContent += `✅ Successfully applied changes to ${successCount} file(s)\n\n`;
+      (generationResults as any[])
+        .filter((r: any) => r.converged && r.generatedContent)
+        .forEach((r: any) => {
+          resultContent += `  ✓ ${r.operation.type.toUpperCase()}: ${r.filePath}\n`;
+        });
+    }
+    
+    if (failCount > 0) {
+      resultContent += `\n⚠️ Failed to apply ${failCount} file(s):\n`;
+      errors.forEach(err => {
+        resultContent += `  ✗ ${err}\n`;
+      });
+    }
+
+    chatSidebarProvider.updateMessage(progressMsgId, {
+      content: resultContent
+    });
+
+    if (successCount > 0) {
+      vscode.window.showInformationMessage(
+        `CodeMind: Successfully applied changes to ${successCount} file(s)!`
+      );
+    }
+    
+    if (failCount > 0) {
+      vscode.window.showWarningMessage(
+        `CodeMind: ${failCount} file(s) failed to apply. Check the chat for details.`
+      );
+    }
+
   } catch (error: any) {
     console.error('[CodeMind] Error applying changes:', error);
+    chatSidebarProvider?.addMessage({
+      role: 'system',
+      content: `❌ Error applying changes: ${error.message}`
+    });
     vscode.window.showErrorMessage(`CodeMind: Failed to apply changes: ${error.message}`);
   }
 }

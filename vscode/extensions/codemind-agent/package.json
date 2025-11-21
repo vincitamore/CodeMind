@@ -3,7 +3,6 @@
   "displayName": "CodeMind AI Agent",
   "description": "Hierarchical multi-agent code intelligence",
   "version": "0.1.0",
-  "publisher": "codemind",
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -17,31 +16,6 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "codemind-sidebar",
-          "title": "CodeMind",
-          "icon": "resources/icon.svg"
-        }
-      ]
-    },
-    "views": {
-      "codemind-sidebar": [
-        {
-          "type": "webview",
-          "id": "codemind.chatSidebar",
-          "name": "Orchestrator",
-          "icon": "$(comment-discussion)"
-        },
-        {
-          "type": "webview",
-          "id": "codemind.analysisView",
-          "name": "Analysis",
-          "icon": "$(search-view-icon)"
-        }
-      ]
-    },
     "commands": [
       {
         "command": "codemind.inlineEdit",
@@ -56,8 +30,8 @@
     "keybindings": [
       {
         "command": "codemind.inlineEdit",
-        "key": "ctrl+l",
-        "mac": "cmd+l",
+        "key": "ctrl+k",
+        "mac": "cmd+k",
         "when": "editorTextFocus"
       }
     ],
@@ -66,32 +40,18 @@
       "properties": {
         "codemind.primaryProvider": {
           "type": "string",
-          "default": "openrouter",
-          "enum": [
-            "openrouter",
-            "anthropic",
-            "local"
-          ],
+          "default": "openai",
+          "enum": ["openai", "anthropic", "local"],
           "description": "Primary LLM provider"
         },
-        "codemind.openrouter.apiKey": {
+        "codemind.openai.apiKey": {
           "type": "string",
           "default": "",
-          "description": "OpenRouter API Key"
-        },
-        "codemind.openrouter.model": {
-          "type": "string",
-          "default": "x-ai/grok-4.1-fast",
-          "enum": [
-            "x-ai/grok-4.1-fast",
-            "anthropic/claude-3.5-sonnet",
-            "meta-llama/llama-3.1-405b-instruct"
-          ],
-          "description": "OpenRouter model to use"
+          "description": "OpenAI API Key"
         },
         "codemind.qualityThreshold": {
           "type": "number",
-          "default": 9,
+          "default": 9.0,
           "minimum": 0,
           "maximum": 10,
           "description": "Quality threshold for N2 loop"
@@ -112,8 +72,5 @@
     "@typescript-eslint/parser": "^6.x",
     "eslint": "^8.x",
     "typescript": "^5.3.0"
-  },
-  "dependencies": {
-    "marked": "^17.0.1"
   }
 }
