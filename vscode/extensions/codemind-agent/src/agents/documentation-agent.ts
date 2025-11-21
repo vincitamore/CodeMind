@@ -88,6 +88,12 @@ recommendations:
 confidence: 0.90
 relevance: 0.85
 
+YAML FORMATTING RULES:
+- Use 2-space indentation
+- Quote strings with colons, quotes, or special chars: "Use: quoted strings"
+- Simple strings without special chars: no quotes needed
+- Return raw YAML (no code fences)
+
 Think like a new team member reading the code. Focus on understandability.`;
   }
 }

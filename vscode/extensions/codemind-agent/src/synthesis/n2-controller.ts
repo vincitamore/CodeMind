@@ -250,39 +250,40 @@ export class N2Controller {
       })
     );
     
-    // Check for failed JSON parses and repair them in parallel using JSON Technician
+    // Check for failed YAML parses and repair them in parallel using YAML Technician
     const failedAgents = agentResults.filter(({ result }) => result.parseFailed);
     
     if (failedAgents.length > 0) {
-      console.log(`[N²] ${failedAgents.length} agent(s) had JSON parse failures, repairing with JSON Technician...`);
+      console.log(`[N²] ${failedAgents.length} agent(s) had YAML parse failures, repairing with YAML Technician...`);
       
-      const { JSONTechnician } = await import('../utils/json-technician');
+      const { YAMLTechnician } = await import('../utils/yaml-technician');
       const llmProvider = (agents[0] as any).llmProvider; // Get LLM provider from any agent
       const llmConfig = (agents[0] as any).config;
-      const technician = new JSONTechnician(llmProvider, llmConfig);
+      const technician = new YAMLTechnician(llmProvider, llmConfig);
       
       // Repair all failed responses in parallel
       const repairs = await Promise.all(
         failedAgents.map(async ({ agent, result }) => {
           try {
-            console.log(`[N²] Repairing ${agent.role} response with JSON Technician...`);
-            const repaired = await technician.repairJSON(
+            console.log(`[N²] Repairing ${agent.role} response with YAML Technician...`);
+            const repaired = await technician.repairYAML(
               result.rawResponse,
               `${agent.role} agent analysis`,
-              `{
-  "insights": ["insight1", "insight2"],
-  "issues": {
-    "critical": [],
-    "warnings": [],
-    "suggestions": []
-  },
-  "recommendations": ["rec1", "rec2"],
-  "confidence": 0.85,
-  "relevance": 0.9
-}`
+              `insights:
+  - insight1
+  - insight2
+issues:
+  critical: []
+  warnings: []
+  suggestions: []
+recommendations:
+  - rec1
+  - rec2
+confidence: 0.85
+relevance: 0.9`
             );
             
-            // Re-parse with the repaired JSON
+            // Re-parse with the repaired YAML
             const reparsed = (agent as any).parseResponse(repaired, result.analysis.relevance);
             console.log(`[N²] ✓ Successfully repaired ${agent.role} response`);
             return { agent, analysis: reparsed };
