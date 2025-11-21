@@ -31,6 +31,7 @@ export class ContextManager {
     const currentFile = loadCurrentFile ? await this.getCurrentFile() : await this.getCurrentFileMetadata();
     const openFiles = this.getOpenFiles();
     const recentFiles = this.getRecentFiles();
+    const projectFiles = await this.getProjectFiles();
     const gitStatus = await this.getGitStatus();
     const diagnostics = this.getDiagnostics();
 
@@ -39,6 +40,7 @@ export class ContextManager {
       currentFile,
       openFiles,
       recentFiles,
+      projectFiles,
       gitStatus,
       diagnostics,
       mentionedFiles
@@ -185,6 +187,36 @@ export class ContextManager {
     // For now, just return open files
     // TODO: Implement proper recent files tracking
     return this.getOpenFiles();
+  }
+
+  /**
+   * Get all files in the project workspace
+   * Excludes common directories like node_modules, .git, out, dist
+   */
+  private async getProjectFiles(): Promise<string[]> {
+    try {
+      console.log('[ContextManager] Gathering project file structure...');
+      
+      // Find all files, excluding common build/dependency directories
+      const files = await vscode.workspace.findFiles(
+        '**/*',
+        '{**/node_modules/**,**/.git/**,**/out/**,**/dist/**,**/build/**,**/.vscode/**,**/.next/**,**/.nuxt/**,**/coverage/**}',
+        500 // Limit to first 500 files
+      );
+      
+      // Convert URIs to workspace-relative paths
+      const workspaceUri = vscode.Uri.file(this.workspaceRoot);
+      const relativePaths = files.map(fileUri => {
+        const relativePath = vscode.workspace.asRelativePath(fileUri, false);
+        return relativePath;
+      }).sort(); // Sort alphabetically for consistency
+      
+      console.log(`[ContextManager] Found ${relativePaths.length} project files`);
+      return relativePaths;
+    } catch (error) {
+      console.error('[ContextManager] Failed to gather project files:', error);
+      return [];
+    }
   }
 
   /**
