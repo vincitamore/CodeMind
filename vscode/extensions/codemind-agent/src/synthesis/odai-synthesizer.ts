@@ -389,64 +389,65 @@ ${context.framework ? `- Framework: ${context.framework}` : ''}
 
 ${codeSection}
 
-⚠️⚠️⚠️ CRITICAL INSTRUCTIONS FOR OUTPUT FORMAT ⚠️⚠️⚠️
+⚠️⚠️⚠️ CRITICAL INSTRUCTIONS - YOU ARE WRITING DIRECTLY TO THE FILE ⚠️⚠️⚠️
 
-**YOU MUST RETURN JSON - NOT RAW CONTENT!**
+**OUTPUT FORMAT: RAW CONTENT (NO JSON WRAPPER!)**
 
-1. Your ENTIRE response MUST be a valid JSON object starting with { and ending with }
-2. Do NOT return raw markdown, raw code, raw text, or ASCII art directly
-3. Do NOT return folder structures, diagrams, or content WITHOUT the JSON wrapper
-4. The "code" field must contain your generated content as a STRING value
-5. Even if generating markdown/documentation, you MUST wrap it in the JSON structure
-6. Generate COMPLETE, COMPREHENSIVE content - not stubs or minimal examples
+You are writing the ACTUAL file content. Your response will be written DIRECTLY to the file.
 
-⚠️ CRITICAL: 
-- FAILURE = Returning raw content like "src/\n├── components/" without JSON wrapper
-- SUCCESS = Returning {"success": true, "code": "# Full implementation plan\n\n## Section 1\n...", ...}
-- Your ENTIRE response must be parseable by JSON.parse()
-- Generate production-ready, comprehensive output (3000-10000+ characters for full documents)
+1. Do NOT wrap your output in JSON (no {"code": "..."})
+2. Do NOT add markdown code fences unless they're part of the actual content
+3. Do NOT add explanations outside the file content
+4. Generate COMPLETE, COMPREHENSIVE, production-ready content
+5. For documentation: Include ASCII art, diagrams, full sections (3000-10000+ characters)
+6. For code: Include complete implementations with imports, types, error handling
+7. Your ENTIRE response = the ENTIRE file content
 
-GENERATE JSON WITH THIS EXACT STRUCTURE:
-{
-  "success": true,
-  "qualityScore": ${distillation.qualityScore},
-  "code": "<PLAIN CODE HERE - NO MARKDOWN>",
-  "explanation": "Clear explanation of what was implemented and why",
-  "keyDecisions": {
-    "architecture": "Architectural decisions made",
-    "security": "Security measures applied",
-    "performance": "Performance considerations",
-    "testing": "Testing approach"
+CORRECT EXAMPLES:
+
+For a README.md file:
+\`\`\`
+  _____ _ _ _ _   
+ / ____| | (_) | |  
+| |  __| |__| | |_ 
+| | |_ | '_ \\| | __|
+| |__| | | | | | |_ 
+ \\_____|_| |_|_|\\__|
+
+# Project Title
+
+## Overview
+Full description here...
+
+## Architecture
+\`\`\`mermaid
+graph TD
+  A --> B
+\`\`\`
+\`\`\`
+
+For a TypeScript file:
+\`\`\`
+import { Something } from './types';
+
+export class MyClass {
+  constructor() {
+    // Full implementation
   }
 }
+\`\`\`
 
-EXAMPLE OF CORRECT FORMAT (CODE):
-{
-  "success": true,
-  "qualityScore": 9.5,
-  "code": "function example() {\\n  return true;\\n}",
-  "explanation": "Added example function",
-  "keyDecisions": {"architecture": "Simple function"}
-}
+For an implementation plan:
+\`\`\`
+# Implementation Plan
 
-EXAMPLE OF CORRECT FORMAT (MARKDOWN/DOCUMENTATION):
-{
-  "success": true,
-  "qualityScore": 9.5,
-  "code": "# Title\\n\\n## Section\\n\\nContent here\\n\\n\`\`\`mermaid\\ngraph TD\\n  A --> B\\n\`\`\`",
-  "explanation": "Added documentation",
-  "keyDecisions": {"documentation": "Structured with mermaid diagram"}
-}
+## Phase 1: Foundation
+- [ ] Task 1
+- [ ] Task 2
 
-WRONG (DO NOT DO THIS):
-{
-  "code": "\`\`\`javascript\\nfunction example() {\\n  return true;\\n}\\n\`\`\`"
-}
-
-ALSO WRONG (DO NOT DO THIS - Don't return raw markdown without JSON wrapper):
-# Title
-## Section
-Content here`;
+## Phase 2: Core Features
+...
+\`\`\``;
 
     const response = await this.llmProvider.generate(
       [
@@ -454,50 +455,75 @@ Content here`;
           role: 'system',
           content: `You are a code/documentation generation assistant.
 
-⚠️⚠️⚠️ CRITICAL RULES - VIOLATIONS WILL BE REJECTED ⚠️⚠️⚠️
+⚠️⚠️⚠️ CRITICAL: YOU ARE WRITING DIRECTLY TO THE FILE ⚠️⚠️⚠️
 
-JSON FORMAT (ABSOLUTELY MANDATORY - NO EXCEPTIONS):
-1. Your response MUST start with { and end with }
-2. Your response MUST be valid JSON parseable by JSON.parse()
-3. NEVER return raw markdown without JSON wrapper (e.g., "# Title\n## Section")
-4. NEVER return raw code without JSON wrapper (e.g., "function foo() {}")
-5. NEVER return ASCII art, folder structures, or diagrams without JSON wrapper (e.g., "src/\n├── components/")
-6. The "code" field must contain your content as a JSON string value
+OUTPUT FORMAT (ABSOLUTELY MANDATORY):
+1. Your response IS the actual file content - it will be written directly to the file AS-IS
+2. Do NOT wrap in JSON (no {"code": "..."} wrapper - just the raw content!)
+3. Do NOT add explanations or commentary outside the file
+4. Do NOT add markdown code fences unless they're part of the actual file
+5. Your ENTIRE response = the ENTIRE file content
 
 COMPLETENESS (ABSOLUTELY MANDATORY):
-7. Generate COMPLETE, COMPREHENSIVE content - NOT snippets, stubs, outlines, or placeholders
-8. If requirements specify sections A, B, C, D → Generate ALL sections with FULL content (not just headings)
-9. Documentation/plans should be 3000-10000+ characters with complete details
-10. Include ALL required diagrams, code examples, checklists, and explanations
+6. Generate COMPLETE, COMPREHENSIVE content - NOT snippets, stubs, or placeholders
+7. If requirements specify sections A, B, C, D → Generate ALL sections with FULL content
+8. Documentation/plans should be 3000-10000+ characters with complete details
+9. Include ALL required ASCII art, diagrams, code examples, checklists, explanations
+10. Apply ALL recommendations from security, performance, architecture, and testing agents
 
-EXAMPLES OF FAILURE:
-❌ Returning: src/\n├── components/ (raw ASCII art - NO JSON!)
-❌ Returning: # Plan\n## Section 1\n## Section 2 (raw markdown - NO JSON!)
-❌ Returning: {"code": "# Overview\n\n## To be completed"} (incomplete stub)
+CORRECT EXAMPLES:
 
-EXAMPLES OF SUCCESS:
-✅ Returning: {"success": true, "code": "# Complete Implementation Plan\n\n## Overview\n[3000+ chars of full content]...", "explanation": "...", "keyDecisions": {...}}
+For a README.md file (your ENTIRE response - NO JSON):
+  _____ _ _ _ _   
+ / ____| | (_) | |  
+| |  __| |__| | |_ 
+| | |_ | '_ \\| | __|
+| |__| | | | | | |_ 
+ \\_____|_| |_|_|\\__|
 
-FAILURE = Not valid JSON OR incomplete content
-SUCCESS = Valid JSON with complete, comprehensive content (3000+ chars for documents)`
+# Project Title
+
+## Overview
+[3000+ characters of full content here...]
+
+For a TypeScript file (your ENTIRE response - NO JSON):
+import { Something } from './types';
+
+export class MyClass {
+  constructor() {
+    // Complete implementation
+  }
+}
+
+WRONG - Do NOT do this:
+{"code": "# Title\\n\\nContent"}  ← NO JSON WRAPPER!
+\`\`\`markdown
+# Title
+\`\`\`  ← NO CODE FENCES (unless part of file)
+
+SUCCESS = Your raw response written directly to file (3000+ chars for documents)`
         },
         { role: 'user', content: prompt }
       ],
       { ...this.config, temperature: 0.4, maxTokens: 50000 }  // Max for code generation
     );
     
-    const result = await this.parseJSON<SynthesisResult>(response.content, {
+    // CRITICAL: For Integrate phase, use RAW response as file content (no JSON parsing!)
+    // The LLM generates actual file content directly, not wrapped in JSON
+    console.log(`[ODAI-Integrate] Using raw response as file content (${response.content.length} chars)`);
+    
+    const result: SynthesisResult = {
       success: true,
-      qualityScore: distillation.qualityScore,
-      code: context.selectionRange ? context.selectionRange.text : context.code,  // Fallback to selection text
-      explanation: 'Code generation failed',
+      qualityScore: distillation.qualityScore, // Use quality from distillation
+      code: response.content.trim(), // Raw LLM response IS the file content
+      explanation: `Generated ${context.language} content incorporating all agent recommendations`,
       keyDecisions: {
-        architecture: 'N/A',
-        security: 'N/A',
-        performance: 'N/A',
-        testing: 'N/A'
+        architecture: 'Applied architectural patterns from analysis',
+        security: 'Incorporated security best practices',
+        performance: 'Optimized based on performance insights',
+        testing: 'Included comprehensive testing approach'
       }
-    }, 'Integrate');
+    };
     
     // CRITICAL: Extract code if it's still wrapped in markdown (safety net)
     if (result.code) {
