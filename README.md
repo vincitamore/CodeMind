@@ -97,35 +97,58 @@ This creates **near-zero hallucination rates** and ensures consistent quality.
 - **Terminal integration** - AI can suggest and run terminal commands
 - **Git integration** - AI-assisted commit messages, PR descriptions
 
+## 📚 Documentation
+
+Comprehensive documentation is available in the [`docs/`](./docs/) directory:
+
+- **[Quick Start Guide](./docs/guides/QUICK_START.md)** - Get up and running in 5 minutes
+- **[Implementation Guide](./docs/implementation/IMPLEMENTATION_GUIDE.md)** - Full setup and build instructions
+- **[Agent System Architecture](./docs/design/AGENT_SYSTEM.md)** - Deep dive into the multi-agent system
+- **[Orchestrator Design](./docs/design/ORCHESTRATOR_DESIGN.md)** - Multi-file operation system (Phase 3)
+- **[Implementation Plan](./docs/implementation/IMPLEMENTATION_PLAN.md)** - Current progress and roadmap
+- **[UI Design Principles](./docs/design/UI_DESIGN_PRINCIPLES.md)** - UI/UX guidelines
+
+See the **[docs README](./docs/README.md)** for the complete documentation index.
+
 ## Quick Start
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/codemind.git
-cd codemind
+git clone https://github.com/vincitamore/codemind.git
+cd codemind/vscode
+
+# Install Node.js 22+ (required)
+nvm install 22
+nvm use 22
 
 # Install dependencies
 npm install
 
-# Build the IDE
-npm run build
+# Build and watch for changes
+npm run watch
 
-# Run CodeMind
+# In another terminal, run CodeMind
 npm run start
 ```
 
-### Configure AI Providers
+### Configure OpenRouter (Current Provider)
+
+1. Get your API key from [OpenRouter](https://openrouter.ai)
+2. Open VSCode Settings (Ctrl+,)
+3. Search for "OpenRouter"
+4. Add your API key:
 
 ```json
 // settings.json
 {
-  "codemind.primaryProvider": "openai",
-  "codemind.openai.apiKey": "sk-...",
-  "codemind.localModel.enabled": true,
-  "codemind.qualityThreshold": 9.0,
-  "codemind.maxIterations": 4
+  "codemind.openrouter.apiKey": "sk-or-v1-...",
+  "codemind.openrouter.model": "x-ai/grok-4.1-fast"
 }
 ```
+
+5. Use `Ctrl+L` to activate inline code editing
+
+See **[QUICK_START.md](./docs/guides/QUICK_START.md)** for detailed setup instructions.
 
 ## Target Performance Metrics
 
@@ -242,34 +265,50 @@ Understand *why* code is written a certain way through multi-perspective explana
 
 ## Roadmap
 
-### Phase 1: Foundation (Months 1-2)
-- VSCode fork setup
-- Basic agent framework
-- ODAI synthesis cycle
-- N2 self-correction loop
-- [ ] OpenAI integration
-- [ ] Inline editing (Ctrl+L)
+### Phase 1: Foundation ✅ COMPLETE
+- ✅ VSCode fork setup and build system
+- ✅ Basic agent framework
+- ✅ ODAI synthesis cycle
+- ✅ N2 self-correction loop with early stopping
+- ✅ OpenRouter integration (Grok, Claude, Llama, Gemini)
+- ✅ Inline editing (Ctrl+L)
 
-### Phase 2: Core Features (Months 3-4)
-- [ ] All six agents implemented
-- [ ] Tab autocomplete
-- [ ] Multi-file awareness
-- [ ] Local model support (Ollama)
-- [ ] Symbol indexing
+### Phase 2: Core Agent System ✅ COMPLETE
+- ✅ All six specialist agents implemented
+- ✅ Task-aware agents with relevance scoring
+- ✅ Weighted quality scoring (relevance × confidence)
+- ✅ Full file context + diagnostic integration
+- ✅ Robust JSON parsing with multiple fallbacks
+- ✅ Beautiful custom UI (progress, results, analysis panels)
+- ✅ Inline diff viewer with GitHub-style decorations
+- ✅ Retry logic with exponential backoff
+- ✅ Empty document detection for comprehensive generation
 
-### Phase 3: Intelligence (Months 5-6)
-- [ ] Semantic code search
+### Phase 3: Orchestrator & Chat 🚧 IN PLANNING
+- [ ] Orchestrator agent (task decomposition, multi-file planning)
+- [ ] Chat/Composer interface (primary interaction point)
+- [ ] Git worktree integration (instant rollback to any message)
+- [ ] Session management (save/load conversations)
+- [ ] Multi-file atomic operations with conflict detection
+- [ ] Workspace context manager (intelligent file gathering)
+- [ ] Verification system (compilation, linting, tests)
+- [ ] Terminal integration (run commands, tests, builds)
+
+See **[ORCHESTRATOR_TODO.md](./docs/implementation/ORCHESTRATOR_TODO.md)** for the complete 10-phase roadmap (5-6 weeks).
+
+### Phase 4: Intelligence (Future)
+- [ ] Semantic code search with vector embeddings
 - [ ] Cross-file refactoring
 - [ ] Advanced debugging assistance
-- [ ] Test generation
-- [ ] Security scanning
+- [ ] Test generation with coverage analysis
+- [ ] Security scanning with vulnerability database
 
-### Phase 4: Polish (Months 7-8)
-- [ ] Performance optimization
-- [ ] Extension marketplace
-- [ ] Cloud sync (optional)
+### Phase 5: Polish (Future)
+- [ ] Performance optimization (caching, parallelization)
+- [ ] Extension marketplace integration
+- [ ] Cloud sync (optional, privacy-respecting)
 - [ ] Collaboration features
-- [ ] Public beta
+- [ ] Public beta release
 
 ## Contributing
 
