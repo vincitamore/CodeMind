@@ -188,7 +188,11 @@ Your JSON will be parsed by JSON.parse() - any syntax error = complete failure!`
       { ...this.config, temperature: 0.3 } // Lower temperature for planning
     );
 
+    console.log(`[Orchestrator] Raw LLM response (first 200 chars):`, response.content.substring(0, 200));
+    
     const jsonStr = extractJSON(response.content);
+    console.log(`[Orchestrator] After extractJSON (length: ${jsonStr.length}, first 200 chars):`, jsonStr.substring(0, 200));
+    
     const parsed = await parseJSONWithTechnician<any>(
       jsonStr,
       this.llmProvider,

@@ -8,6 +8,7 @@ export { OrchestratorAgent } from './orchestrator-agent';
 export { FileManager } from './file-manager';
 export { ContextManager } from './context-manager';
 export { CodeGenerator } from './code-generator';
+export { TerminalManager } from './terminal-manager';
 
 export * from './types';
 
