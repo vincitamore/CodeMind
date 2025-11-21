@@ -125,7 +125,7 @@ export function activate(context: vscode.ExtensionContext) {
   
   // Handle user messages from chat
   chatSidebarProvider.onMessage('userMessage', async (data) => {
-    await handleOrchestratorRequest(data.content, context);
+    await handleOrchestratorRequest(data.content, data.mentions || [], context);
   });
   
   // Handle apply changes
@@ -339,13 +339,55 @@ export function activate(context: vscode.ExtensionContext) {
 /**
  * Handle orchestrator request from chat sidebar
  */
-async function handleOrchestratorRequest(userRequest: string, context: vscode.ExtensionContext) {
+async function handleOrchestratorRequest(userRequest: string, mentionedFiles: string[], context: vscode.ExtensionContext) {
   if (!chatSidebarProvider || !contextManager || !fileManager) {
     vscode.window.showErrorMessage('CodeMind: Orchestrator not initialized');
     return;
   }
 
   try {
+    // Load mentioned files into context
+    const loadedFiles: Array<{ path: string; content: string; language: string }> = [];
+    if (mentionedFiles && mentionedFiles.length > 0) {
+      const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '';
+      const path = require('path');
+      
+      for (const mentionedPath of mentionedFiles) {
+        try {
+          const absolutePath = path.isAbsolute(mentionedPath)
+            ? mentionedPath
+            : path.join(workspaceRoot, mentionedPath);
+          
+          const uri = vscode.Uri.file(absolutePath);
+          const document = await vscode.workspace.openTextDocument(uri);
+          const language = document.languageId;
+          const content = document.getText();
+          
+          loadedFiles.push({
+            path: mentionedPath,
+            content,
+            language
+          });
+          
+          console.log(`[CodeMind] Loaded mentioned file: ${mentionedPath}`);
+        } catch (error) {
+          console.error(`[CodeMind] Failed to load mentioned file ${mentionedPath}:`, error);
+          chatSidebarProvider.addMessage({
+            role: 'system',
+            content: `⚠️ Could not load @${mentionedPath}`
+          });
+        }
+      }
+    }
+
+    // Show loaded files if any
+    if (loadedFiles.length > 0) {
+      chatSidebarProvider.addMessage({
+        role: 'system',
+        content: `📎 Loaded ${loadedFiles.length} file(s): ${loadedFiles.map(f => f.path).join(', ')}`
+      });
+    }
+
     // Add assistant "thinking" message
     const thinkingId = chatSidebarProvider.addMessage({
       role: 'assistant',
@@ -393,7 +435,7 @@ async function handleOrchestratorRequest(userRequest: string, context: vscode.Ex
       content: '📂 Gathering workspace context...'
     });
     
-    const workspaceContext = await contextManager.gatherContext();
+    const workspaceContext = await contextManager.gatherContext(loadedFiles.length > 0 ? loadedFiles : undefined);
 
     // Phase 2: Analyze request
     chatSidebarProvider.updateMessage(thinkingId, {

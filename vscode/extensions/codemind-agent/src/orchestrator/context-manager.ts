@@ -24,8 +24,11 @@ export class ContextManager {
   /**
    * Gather complete workspace context
    */
-  async gatherContext(): Promise<WorkspaceContext> {
-    const currentFile = await this.getCurrentFile();
+  async gatherContext(
+    mentionedFiles?: Array<{ path: string; content: string; language: string }>,
+    loadCurrentFile: boolean = false // Only load if there's a selection or explicitly requested
+  ): Promise<WorkspaceContext> {
+    const currentFile = loadCurrentFile ? await this.getCurrentFile() : await this.getCurrentFileMetadata();
     const openFiles = this.getOpenFiles();
     const recentFiles = this.getRecentFiles();
     const gitStatus = await this.getGitStatus();
@@ -37,12 +40,39 @@ export class ContextManager {
       openFiles,
       recentFiles,
       gitStatus,
-      diagnostics
+      diagnostics,
+      mentionedFiles
     };
   }
 
   /**
-   * Get current active file with selection
+   * Get current active file metadata only (no full content unless there's a selection)
+   */
+  private async getCurrentFileMetadata(): Promise<WorkspaceContext['currentFile']> {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      return undefined;
+    }
+
+    const document = editor.document;
+    const selection = editor.selection;
+
+    // Only load content if there's a selection
+    if (!selection.isEmpty) {
+      return this.getCurrentFile();
+    }
+
+    // Otherwise just return metadata
+    return {
+      path: document.uri.fsPath,
+      content: '', // Empty - will be loaded on-demand if needed
+      language: document.languageId,
+      selection: undefined
+    };
+  }
+
+  /**
+   * Get current active file with full content
    */
   private async getCurrentFile(): Promise<WorkspaceContext['currentFile']> {
     const editor = vscode.window.activeTextEditor;
@@ -81,6 +111,37 @@ export class ContextManager {
       language: document.languageId,
       selection: selectionInfo
     };
+  }
+
+  /**
+   * Load specific files on-demand (for orchestrator to request after task analysis)
+   */
+  async loadFiles(filePaths: string[]): Promise<Array<{ path: string; content: string; language: string }>> {
+    const loadedFiles: Array<{ path: string; content: string; language: string }> = [];
+    const path = require('path');
+
+    for (const filePath of filePaths) {
+      try {
+        const absolutePath = path.isAbsolute(filePath)
+          ? filePath
+          : path.join(this.workspaceRoot, filePath);
+        
+        const uri = vscode.Uri.file(absolutePath);
+        const document = await vscode.workspace.openTextDocument(uri);
+        
+        loadedFiles.push({
+          path: filePath,
+          content: document.getText(),
+          language: document.languageId
+        });
+        
+        console.log(`[ContextManager] Loaded file: ${filePath}`);
+      } catch (error) {
+        console.error(`[ContextManager] Failed to load file ${filePath}:`, error);
+      }
+    }
+
+    return loadedFiles;
   }
 
   /**

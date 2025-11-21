@@ -93,6 +93,11 @@ export interface WorkspaceContext {
     untracked: string[];
   };
   diagnostics?: Map<string, any[]>; // Errors/warnings by file
+  mentionedFiles?: Array<{    // Files explicitly mentioned with @
+    path: string;
+    content: string;
+    language: string;
+  }>;
 }
 
 /**
