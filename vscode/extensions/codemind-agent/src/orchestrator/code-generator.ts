@@ -48,12 +48,14 @@ export class CodeGenerator {
   /**
    * Generate code for all files in the execution plan
    * @param applyImmediately - If true, write files as soon as they're generated (better UX)
+   * @param relatedFiles - Files loaded for context (requiredFiles, mentionedFiles, etc.)
    */
   async generateCode(
     plan: ExecutionPlan,
     userRequest: string,
     progressCallback?: OrchestratorProgressCallback,
-    applyImmediately: boolean = false
+    applyImmediately: boolean = false,
+    relatedFiles?: Array<{ path: string; content: string; language: string }>
   ): Promise<FileGenerationResult[]> {
     const results: FileGenerationResult[] = [];
     const totalSteps = plan.steps.length;
@@ -77,7 +79,7 @@ export class CodeGenerator {
       });
 
       try {
-        const result = await this.generateFileCode(step, userRequest, plan);
+        const result = await this.generateFileCode(step, userRequest, plan, relatedFiles);
         results.push(result);
 
         // Optionally apply immediately for better UX (user sees files appear during generation)
@@ -156,7 +158,8 @@ export class CodeGenerator {
   private async generateFileCode(
     step: PlannedChange,
     userRequest: string,
-    plan: ExecutionPlan
+    plan: ExecutionPlan,
+    relatedFiles?: Array<{ path: string; content: string; language: string }>
   ): Promise<FileGenerationResult> {
     const { filePath, operation, rationale } = step;
 
@@ -164,7 +167,7 @@ export class CodeGenerator {
     const instruction = this.buildFileInstruction(userRequest, step, plan);
 
     // Gather context for this file
-    const codeContext = await this.gatherFileContext(filePath, operation);
+    const codeContext = await this.gatherFileContext(filePath, operation, relatedFiles);
 
     // Initialize synthesis components
     const synthesizer = new ODAISynthesizer(
@@ -324,7 +327,8 @@ export class CodeGenerator {
    */
   private async gatherFileContext(
     filePath: string,
-    operation: FileOperation
+    operation: FileOperation,
+    relatedFiles?: Array<{ path: string; content: string; language: string }>
   ): Promise<CodeContext> {
     let content = '';
     let language = 'typescript'; // Default
@@ -387,7 +391,8 @@ export class CodeGenerator {
       code: content,
       filePath,
       language,
-      diagnostics
+      diagnostics,
+      relatedFiles: relatedFiles || []
     };
   }
 

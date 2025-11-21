@@ -562,7 +562,8 @@ async function handleOrchestratorRequest(userRequest: string, mentionedFiles: st
             content: planSummary + `\n\n${event.status} (${event.progress}%)`
           });
         },
-        true  // applyImmediately - write files as soon as they're generated!
+        true,  // applyImmediately - write files as soon as they're generated!
+        contextFiles  // Pass loaded files for context
       );
     }
     

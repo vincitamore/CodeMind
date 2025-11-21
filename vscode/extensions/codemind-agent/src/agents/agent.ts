@@ -61,6 +61,11 @@ export interface CodeContext {
   };
   diagnostics?: Diagnostic[];  // Linter/compiler errors and warnings
   framework?: string;
+  relatedFiles?: Array<{     // Related files for context (imports, dependencies, etc.)
+    path: string;
+    content: string;
+    language: string;
+  }>;
 }
 
 /**
