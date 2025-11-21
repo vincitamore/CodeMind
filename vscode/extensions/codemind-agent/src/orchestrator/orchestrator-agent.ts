@@ -206,8 +206,116 @@ Structure:
       return this.validateAndRepairPlan(parsed, taskAnalysis, workspaceContext);
     }
 
-    // Fallback: Single-file operation
+    // LENIENT FALLBACK: Extract plan data with regex when YAML parsing fails
+    // We don't need perfect YAML - just extract the data!
+    console.log(`[Orchestrator] YAML parsing failed, attempting lenient regex extraction...`);
+    const extracted = this.extractPlanWithRegex(response.content, taskAnalysis, workspaceContext);
+    if (extracted && extracted.steps.length > 0) {
+      console.log(`[Orchestrator] ✅ Lenient extraction succeeded: ${extracted.steps.length} steps`);
+      return extracted;
+    }
+
+    // Absolute fallback: Single-file operation
+    console.warn(`[Orchestrator] All parsing attempts failed, using fallback plan`);
     return this.createFallbackPlan(userRequest, taskAnalysis, workspaceContext);
+  }
+  
+  /**
+   * Extract plan data using regex when YAML parsing fails
+   * This is SUPER lenient - we just need the data, not perfect syntax
+   */
+  private extractPlanWithRegex(
+    response: string,
+    taskAnalysis: any,
+    workspaceContext: WorkspaceContext
+  ): ExecutionPlan | null {
+    try {
+      // Extract taskType
+      const taskTypeMatch = response.match(/taskType:\s*(\w+)/);
+      const taskType = taskTypeMatch ? taskTypeMatch[1] : 'code_generation';
+      
+      // Extract summary
+      const summaryMatch = response.match(/summary:\s*["']?([^"\n]+?)["']?\s*\n/);
+      const summary = summaryMatch ? summaryMatch[1].trim() : 'Code generation';
+      
+      // Extract steps - this is the important part!
+      const steps: any[] = [];
+      
+      // Find all step blocks (look for filePath as the start of a step)
+      const stepMatches = response.matchAll(/filePath:\s*([^\n]+)/g);
+      
+      for (const match of stepMatches) {
+        const filePath = match[1].trim();
+        
+        // Find the block of text for this step (from filePath to next filePath or end)
+        const stepStartIndex = match.index!;
+        const nextStepMatch = response.slice(stepStartIndex + 10).search(/\n\s+-\s+filePath:/);
+        const stepEndIndex = nextStepMatch === -1 
+          ? response.length 
+          : stepStartIndex + 10 + nextStepMatch;
+        
+        const stepBlock = response.slice(stepStartIndex, stepEndIndex);
+        
+        // Extract operation type
+        const typeMatch = stepBlock.match(/type:\s*(\w+)/);
+        const opType = typeMatch ? typeMatch[1] : 'create';
+        
+        // Extract command (for terminal operations)
+        const commandMatch = stepBlock.match(/command:\s*(.+?)(?=\n\s+\w+:|$)/s);
+        const command = commandMatch ? commandMatch[1].trim().replace(/^["']|["']$/g, '') : undefined;
+        
+        // Extract rationale
+        const rationaleMatch = stepBlock.match(/rationale:\s*(.+?)(?=\n\s+-\s+filePath:|\n\w+:|$)/s);
+        const rationale = rationaleMatch ? rationaleMatch[1].trim().replace(/^["']|["']$/g, '') : 'Operation required';
+        
+        // Build step
+        const step: any = {
+          filePath,
+          operation: {
+            type: opType,
+            content: '',
+            command: opType === 'terminal' ? command : undefined
+          },
+          rationale,
+          priority: steps.length + 1,
+          risks: []
+        };
+        
+        steps.push(step);
+      }
+      
+      if (steps.length === 0) {
+        console.warn(`[Orchestrator] Regex extraction found no steps`);
+        return null;
+      }
+      
+      // Extract affected files
+      const affectedFiles = steps.map(s => s.filePath);
+      
+      // Extract confidence
+      const confidenceMatch = response.match(/confidence:\s*([0-9.]+)/);
+      const confidence = confidenceMatch ? parseFloat(confidenceMatch[1]) : 0.8;
+      
+      // Build plan
+      const plan: ExecutionPlan = {
+        taskType: taskType as any,
+        summary,
+        steps,
+        requiredFiles: [],
+        affectedFiles,
+        estimatedComplexity: 'medium',
+        confidence,
+        risks: [],
+        verificationSteps: ['Verify file creation', 'Check for errors']
+      };
+      
+      console.log(`[Orchestrator] Regex-extracted plan: ${steps.length} steps, confidence ${confidence}`);
+      return this.validateAndRepairPlan(plan, taskAnalysis, workspaceContext);
+      
+    } catch (error) {
+      console.error(`[Orchestrator] Regex extraction failed:`, error);
+      return null;
+    }
   }
 
   /**
