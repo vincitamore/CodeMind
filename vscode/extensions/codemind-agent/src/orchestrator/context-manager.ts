@@ -122,20 +122,43 @@ export class ContextManager {
 
     for (const filePath of filePaths) {
       try {
-        const absolutePath = path.isAbsolute(filePath)
-          ? filePath
-          : path.join(this.workspaceRoot, filePath);
+        let absolutePath: string;
+        
+        // If it's already an absolute path or contains path separators, use it directly
+        if (path.isAbsolute(filePath) || filePath.includes('/') || filePath.includes('\\')) {
+          absolutePath = path.isAbsolute(filePath)
+            ? filePath
+            : path.join(this.workspaceRoot, filePath);
+        } else {
+          // It's just a filename - search the workspace for it
+          console.log(`[ContextManager] Searching workspace for file: ${filePath}`);
+          const foundFiles = await vscode.workspace.findFiles(`**/${filePath}`, '**/node_modules/**', 10);
+          
+          if (foundFiles.length === 0) {
+            throw new Error(`File not found: ${filePath}`);
+          }
+          
+          if (foundFiles.length > 1) {
+            console.warn(`[ContextManager] Multiple files found for ${filePath}, using first: ${foundFiles[0].fsPath}`);
+          }
+          
+          absolutePath = foundFiles[0].fsPath;
+          console.log(`[ContextManager] Found file at: ${absolutePath}`);
+        }
         
         const uri = vscode.Uri.file(absolutePath);
         const document = await vscode.workspace.openTextDocument(uri);
         
+        // Use workspace-relative path for display
+        const relativePath = path.relative(this.workspaceRoot, absolutePath);
+        
         loadedFiles.push({
-          path: filePath,
+          path: relativePath,
           content: document.getText(),
           language: document.languageId
         });
         
-        console.log(`[ContextManager] Loaded file: ${filePath}`);
+        console.log(`[ContextManager] Loaded file: ${relativePath}`);
       } catch (error) {
         console.error(`[ContextManager] Failed to load file ${filePath}:`, error);
       }
