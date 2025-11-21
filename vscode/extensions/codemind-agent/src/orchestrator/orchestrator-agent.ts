@@ -411,6 +411,40 @@ For each file that needs to be changed:
 4. What risks it involves
 5. Priority/order (lower number = earlier)
 
+⚠️⚠️⚠️ CRITICAL: SURGICAL MODIFICATIONS ⚠️⚠️⚠️
+
+**Operation Types - Choose Carefully:**
+
+- **"create"**: New file that doesn't exist yet
+  → Agents will generate complete file from scratch
+
+- **"modify"**: File exists and needs TARGETED changes
+  → Agents will make SURGICAL modifications, preserving all unrelated code
+  → ⚠️ Be conservative! Only use "modify" if changes are necessary
+  → In rationale, specify WHAT needs to change (e.g., "Add error handling to parseJSON function")
+  → Agents will preserve everything else in the file
+
+- **"delete"**: Remove file completely
+
+- **"rename"**: Move/rename file
+
+- **"terminal"**: Execute shell command (e.g., install packages, run build, compile, test)
+  → Use for: npm/pnpm install, build commands, running tests, git operations, etc.
+  → User will be prompted to approve before execution
+  → Command output will be streamed to user in real-time
+  → Use workspace-relative paths in commands
+  → For "terminal" operations:
+    * Set "command" field with the shell command
+    * Set "workingDirectory" if needed (defaults to workspace root)
+    * filePath can be a descriptive name (e.g., "install-dependencies")
+    * Specify in rationale WHY this command is needed
+
+**When to use "modify" vs "create":**
+- Existing file, add one function → "modify" (surgical)
+- Existing file, refactor entire architecture → Consider multiple "modify" operations or new files
+- File doesn't exist → "create"
+- Stub/empty file (<50 lines) → Often better to "create" (regenerate completely)
+
 CRITICAL - Two types of files:
 1. **affectedFiles**: Files that will be MODIFIED/CREATED/DELETED by this operation
 2. **requiredFiles**: Files needed for CONTEXT (imports, types, related code that agents should read to understand the codebase)
@@ -421,6 +455,7 @@ Consider:
 - Rollback strategy (how to undo if something fails)
 - Verification (how to check if changes work)
 - What existing code do agents need to see? → Add to requiredFiles
+- BE CONSERVATIVE with "modify" operations - existing code works, don't break it!
 
 ## Response Format:
 Return ONLY valid JSON (no markdown code fences, no extra text):
@@ -450,9 +485,15 @@ Return ONLY valid JSON (no markdown code fences, no extra text):
    CORRECT: "Placeholder"
    WRONG: "TODO: implement \\n- Feature 1\\n- Feature 2" (keep it simple!)
 
-5. NO trailing commas, NO single quotes, NO actual newlines in strings
+5. For terminal operations, add these fields to operation:
+   - "command": "pnpm install" (the shell command)
+   - "workingDirectory": "." (optional, defaults to workspace root)
 
-EXAMPLE:
+6. NO trailing commas, NO single quotes, NO actual newlines in strings
+
+EXAMPLES:
+
+Example 1 - CREATE new files:
 {
   "taskType": "code_generation",
   "summary": "Create a new utility function and add tests",
@@ -466,41 +507,108 @@ EXAMPLE:
         "reason": "Create new utility function"
       },
       "priority": 1,
-      "rationale": "Need utility function before tests can reference it",
+      "rationale": "New file - need utility function before tests can reference it",
       "risks": ["May conflict with existing utilities"],
-      "agentInputs": []
-    },
-    {
-      "filePath": "tests/helper.test.ts",
-      "operation": {
-        "type": "create",
-        "filePath": "tests/helper.test.ts",
-        "content": "// Test suite - full tests will be generated",
-        "reason": "Add test coverage"
-      },
-      "priority": 2,
-      "rationale": "Tests should be created after implementation",
-      "risks": ["Tests may need adjustment after implementation"],
       "agentInputs": []
     }
   ],
   "requiredFiles": ["src/utils/index.ts", "src/types.ts"],
-  "affectedFiles": ["src/utils/helper.ts", "tests/helper.test.ts"],
+  "affectedFiles": ["src/utils/helper.ts"],
   "estimatedComplexity": "medium",
   "risks": ["May need to update imports in other files"],
-  "verificationSteps": [
-    "Run TypeScript compiler to check for errors",
-    "Run tests to verify functionality",
-    "Check that no existing functionality is broken"
-  ],
+  "verificationSteps": ["Run TypeScript compiler", "Run tests"],
   "confidence": 0.85
 }
 
-⚠️ REMINDER: 
+Example 2 - MODIFY existing file (SURGICAL):
+{
+  "taskType": "refactoring",
+  "summary": "Add error handling to existing parseJSON function",
+  "steps": [
+    {
+      "filePath": "src/utils/json.ts",
+      "operation": {
+        "type": "modify",
+        "filePath": "src/utils/json.ts",
+        "content": "// Add try-catch to parseJSON function",
+        "reason": "Add error handling to parseJSON function only"
+      },
+      "priority": 1,
+      "rationale": "SURGICAL CHANGE: Only modify parseJSON function, preserve all other functions in file",
+      "risks": ["May affect code that relies on parseJSON throwing errors"],
+      "agentInputs": []
+    }
+  ],
+  "requiredFiles": ["src/types.ts"],
+  "affectedFiles": ["src/utils/json.ts"],
+  "estimatedComplexity": "low",
+  "risks": ["Breaking change if callers expect exceptions"],
+  "verificationSteps": ["Check all callers of parseJSON", "Run unit tests"],
+  "confidence": 0.9
+}
+
+Example 3 - TERMINAL operations:
+{
+  "taskType": "code_generation",
+  "summary": "Initialize new Next.js project with dependencies",
+  "steps": [
+    {
+      "filePath": "package.json",
+      "operation": {
+        "type": "create",
+        "filePath": "package.json",
+        "content": "// Package.json with dependencies",
+        "reason": "Define project dependencies"
+      },
+      "priority": 1,
+      "rationale": "Need package.json before installing dependencies",
+      "risks": [],
+      "agentInputs": []
+    },
+    {
+      "filePath": "install-dependencies",
+      "operation": {
+        "type": "terminal",
+        "filePath": "install-dependencies",
+        "command": "pnpm install",
+        "workingDirectory": ".",
+        "reason": "Install project dependencies defined in package.json"
+      },
+      "priority": 2,
+      "rationale": "Must install dependencies after creating package.json",
+      "risks": ["Network failure", "Incompatible versions"],
+      "agentInputs": []
+    },
+    {
+      "filePath": "compile-project",
+      "operation": {
+        "type": "terminal",
+        "filePath": "compile-project",
+        "command": "pnpm run build",
+        "reason": "Verify project compiles successfully"
+      },
+      "priority": 3,
+      "rationale": "Verify all files compile after installation",
+      "risks": ["TypeScript errors", "Missing dependencies"],
+      "agentInputs": []
+    }
+  ],
+  "requiredFiles": [],
+  "affectedFiles": ["package.json"],
+  "estimatedComplexity": "medium",
+  "risks": ["Dependency conflicts", "Build failures"],
+  "verificationSteps": ["Check pnpm install success", "Verify build output", "Run type check"],
+  "confidence": 0.85
+}
+
+⚠️ CRITICAL REMINDERS: 
 - Keep "content" fields SHORT. Full code generation happens in a later phase!
 - "requiredFiles" = Files agents should READ for context (imports, types, related code)
 - "affectedFiles" = Files that will be MODIFIED/CREATED (automatically populated from steps)
-- Think: "What files do agents need to understand the codebase?" → requiredFiles`;
+- Think: "What files do agents need to understand the codebase?" → requiredFiles
+- "modify" = SURGICAL changes only! Preserve existing code. Specify what to change in rationale.
+- "create" = New file or complete regeneration
+- BE CONSERVATIVE: Don't modify working code unless necessary!`;
 
     return prompt;
   }

@@ -308,6 +308,12 @@ export class CodeGenerator {
         instruction += `This file will be renamed to ${step.operation.newPath}.\n`;
         instruction += `Update any internal references if needed.\n`;
         break;
+
+      case 'terminal':
+        // Terminal operations are handled separately in extension.ts
+        // They should not reach the code generator
+        instruction += `ERROR: Terminal operations should be filtered out before code generation.\n`;
+        break;
     }
 
     return instruction;

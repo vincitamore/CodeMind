@@ -29,13 +29,18 @@ export enum OrchestratorTaskType {
  * Represents a single file operation
  */
 export interface FileOperation {
-  type: 'create' | 'modify' | 'delete' | 'rename';
+  type: 'create' | 'modify' | 'delete' | 'rename' | 'terminal';
   filePath: string;
   newPath?: string;           // For rename operations
-  content?: string;           // For create/modify operations
+  content?: string;           // For create/modify operations (or terminal command)
   existingContent?: string;   // Original content for rollback
   reason: string;             // Why this operation is needed
   dependencies?: string[];    // Other files this depends on
+  
+  // Terminal-specific fields
+  command?: string;           // Shell command to execute
+  workingDirectory?: string;  // Where to run the command (defaults to workspace root)
+  requiresApproval?: boolean; // Whether to ask user before running (default: true)
 }
 
 /**

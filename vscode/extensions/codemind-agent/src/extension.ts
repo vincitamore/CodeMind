@@ -540,21 +540,121 @@ async function handleOrchestratorRequest(userRequest: string, mentionedFiles: st
       ];
     }
 
-    // Phase 4: Generate code for all files
-    chatSidebarProvider.updateMessage(planMessageId, {
-      content: planSummary + '\n\n🔧 Generating code with specialist agents...\n_(This may take several minutes for complex files)_'
-    });
+    // Phase 4a: Separate terminal operations from file operations
+    const fileSteps = plan.steps.filter(step => step.operation.type !== 'terminal');
+    const terminalSteps = plan.steps.filter(step => step.operation.type === 'terminal');
+    
+    // Phase 4b: Generate code for file operations
+    let generationResults: any[] = [];
+    if (fileSteps.length > 0) {
+      chatSidebarProvider.updateMessage(planMessageId, {
+        content: planSummary + '\n\n🔧 Generating code with specialist agents...\n_(This may take several minutes for complex files)_'
+      });
 
-    const generationResults = await codeGenerator.generateCode(
-      plan,
-      userRequest,
-      (event) => {
-        chatSidebarProvider?.updateMessage(planMessageId, {
-          content: planSummary + `\n\n${event.status} (${event.progress}%)`
+      // Create a temporary plan with only file operations
+      const filePlan = { ...plan, steps: fileSteps };
+      
+      generationResults = await codeGenerator.generateCode(
+        filePlan,
+        userRequest,
+        (event) => {
+          chatSidebarProvider?.updateMessage(planMessageId, {
+            content: planSummary + `\n\n${event.status} (${event.progress}%)`
+          });
+        },
+        true  // applyImmediately - write files as soon as they're generated!
+      );
+    }
+    
+    // Phase 4c: Execute terminal operations
+    if (terminalSteps.length > 0) {
+      chatSidebarProvider.updateMessage(planMessageId, {
+        content: planSummary + '\n\n⚡ Executing terminal commands...'
+      });
+      
+      for (const step of terminalSteps) {
+        const command = step.operation.command || step.operation.content || '';
+        if (!command) {
+          console.warn(`[Orchestrator] Terminal step ${step.filePath} has no command`);
+          continue;
+        }
+        
+        chatSidebarProvider.addMessage({
+          role: 'system',
+          content: `🖥️ Requesting approval to run: \`${command}\`\n_${step.rationale}_`
         });
-      },
-      true  // applyImmediately - write files as soon as they're generated!
-    );
+        
+        // Show terminal approval modal and execute
+        if (terminalManager && terminalApprovalPanel) {
+          const tm = terminalManager;
+          const tap = terminalApprovalPanel;
+          
+          try {
+            const terminalCommand = {
+              command,
+              cwd: step.operation.workingDirectory || workspaceContext.workspaceRoot,
+              reason: step.rationale,
+              timeout: 600000 // 10 minutes default timeout
+            };
+            
+            const approved = await tap.requestApproval(terminalCommand);
+            
+            if (approved) {
+              // Mark as running in the approval panel
+              tap.markRunning();
+              
+              const startTime = Date.now();
+              const result = await tm.executeCommand(
+                terminalCommand,
+                (type, line) => {
+                  // Stream output to the approval panel in real-time
+                  tap.addOutput(type, line);
+                }
+              );
+              
+              const duration = Date.now() - startTime;
+              tap.markComplete(result.exitCode || 0, duration);
+              
+              if (result.exitCode === 0) {
+                chatSidebarProvider.addMessage({
+                  role: 'system',
+                  content: `✅ Command completed successfully: \`${command}\`\n` +
+                           `⏱️ Duration: ${(duration / 1000).toFixed(1)}s`
+                });
+              } else {
+                const errorOutput = result.stderr.length > 0 
+                  ? result.stderr.join('\n')
+                  : result.stdout.slice(-10).join('\n');
+                  
+                chatSidebarProvider.addMessage({
+                  role: 'system',
+                  content: `❌ Command failed with exit code ${result.exitCode}: \`${command}\`\n\`\`\`\n${errorOutput}\n\`\`\``
+                });
+              }
+            } else {
+              chatSidebarProvider.addMessage({
+                role: 'system',
+                content: `⏭️ User declined to run: \`${command}\``
+              });
+            }
+          } catch (error) {
+            console.error(`[Orchestrator] Terminal command failed:`, error);
+            chatSidebarProvider.addMessage({
+              role: 'system',
+              content: `❌ Error executing command: ${error instanceof Error ? error.message : 'Unknown error'}`
+            });
+            
+            tap.markComplete(-1, 0);
+          }
+        } else {
+          console.warn('[Orchestrator] Terminal manager or approval panel not available');
+          chatSidebarProvider.addMessage({
+            role: 'system',
+            content: `⚠️ Cannot execute terminal command - terminal system not initialized`
+          });
+        }
+      }
+    }
 
     // Update plan with generated content
     for (let i = 0; i < generationResults.length; i++) {
