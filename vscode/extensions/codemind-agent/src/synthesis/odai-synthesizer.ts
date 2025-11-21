@@ -308,7 +308,12 @@ Return JSON:
     taskType: TaskType = TaskType.GENERAL
   ): Promise<SynthesisResult> {
     // Detect if file is essentially empty (just a title/stub) for documentation generation
-    const isEmptyDocument = context.code.trim().length < 200 && taskType === TaskType.DOCUMENTATION;
+    // Check BOTH task type AND file type (markdown, text files)
+    const isDocumentationFile = taskType === TaskType.DOCUMENTATION || 
+                                context.language === 'markdown' ||
+                                context.language === 'plaintext' ||
+                                context.filePath.match(/\.(md|txt|rst|adoc)$/i);
+    const isEmptyDocument = context.code.trim().length < 200 && isDocumentationFile;
     
     // Format the code context with selection highlighting
     let codeSection = '';
@@ -354,11 +359,28 @@ ${lines.map((line, idx) => {
 Do NOT regenerate the entire file. Focus on the selected section while using the full file context for understanding imports, types, and structure.`;
       }
     } else {
-      codeSection = `EXISTING CODE:
+      // No selection range - check if document is empty for full document generation
+      if (isEmptyDocument) {
+        codeSection = `CURRENT FILE (ESSENTIALLY EMPTY - new file or just stub):
+\`\`\`${context.language}
+${context.code}
+\`\`\`
+
+USER REQUEST: Generate a COMPLETE, comprehensive ${context.language} document.`;
+        
+        scopeInstructions = `⚠️ CRITICAL SCOPE:
+- The file is currently EMPTY or has minimal content
+- You must generate the COMPLETE, COMPREHENSIVE document from scratch
+- Generate ALL sections, content, examples, diagrams, and details
+- This should be a production-ready, thorough document (3000-10000+ characters)
+- DO NOT return just a snippet or outline - generate the FULL content`;
+      } else {
+        codeSection = `EXISTING CODE:
 \`\`\`${context.language}
 ${context.code}
 \`\`\``;
-      scopeInstructions = '';
+        scopeInstructions = '';
+      }
     }
     
     const prompt = `Generate the COMPLETE, COMPREHENSIVE final implementation based on synthesis.

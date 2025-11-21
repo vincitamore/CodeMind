@@ -174,7 +174,7 @@ export class CodeGenerator {
           agentsArray,
           synthesizer,
           codeContext,
-          this.classifyOperationType(operation.type)
+          this.classifyOperationType(operation.type, filePath)
         ),
         this.createTimeout(600000, 'Code generation exceeded 10 minute timeout')
       ]) as N2Result;
@@ -416,13 +416,18 @@ export class CodeGenerator {
 
   /**
    * Classify operation type for task classification
+   * Takes file path into account to detect documentation files
    */
-  private classifyOperationType(operationType: string): TaskType {
+  private classifyOperationType(operationType: string, filePath?: string): TaskType {
+    // Check if this is a documentation file by extension
+    const isDocFile = filePath && filePath.match(/\.(md|txt|rst|adoc|docx?)$/i);
+    
     switch (operationType) {
       case 'create':
-        return TaskType.CODE_GENERATION;
+        // If creating a documentation file, classify as DOCUMENTATION
+        return isDocFile ? TaskType.DOCUMENTATION : TaskType.CODE_GENERATION;
       case 'modify':
-        return TaskType.REFACTORING;
+        return isDocFile ? TaskType.DOCUMENTATION : TaskType.REFACTORING;
       case 'delete':
         return TaskType.REFACTORING;
       case 'rename':
