@@ -14,7 +14,7 @@ import {
   RepairDirective
 } from './types';
 import { extractJSON, extractCode } from '../utils/text-extraction';
-import { safeJSONParse } from '../utils/json-repair';
+import { parseJSONWithTechnician } from '../utils/json-technician';
 import { TaskType } from '../utils/task-classifier';
 
 export class ODAISynthesizer {
@@ -138,7 +138,7 @@ Return JSON with this EXACT structure:
       { ...this.config, temperature: 0.3 }
     );
     
-    return this.parseJSON<Observation>(response.content, {
+    return await this.parseJSON<Observation>(response.content, {
       coreNeed: 'Improve code quality',
       patterns: [],
       conflicts: [],
@@ -219,7 +219,7 @@ Return JSON:
       { ...this.config, temperature: 0.2 }
     );
     
-    return this.parseJSON<Distillation>(response.content, {
+    return await this.parseJSON<Distillation>(response.content, {
       coreRequirements: ['Improve code'],
       keyConstraints: [],
       implementationPrinciples: [],
@@ -284,7 +284,7 @@ Return JSON:
       { ...this.config, temperature: 0.3 }
     );
     
-    const repairDirective = this.parseJSON<RepairDirective>(response.content, {
+    const repairDirective = await this.parseJSON<RepairDirective>(response.content, {
       overallGuidance: 'Provide more detailed analysis',
       agentSpecific: {},
       focusAreas: []
@@ -486,7 +486,7 @@ SUCCESS = Valid JSON with complete, comprehensive content (3000+ chars for docum
       { ...this.config, temperature: 0.4, maxTokens: 50000 }  // Max for code generation
     );
     
-    const result = this.parseJSON<SynthesisResult>(response.content, {
+    const result = await this.parseJSON<SynthesisResult>(response.content, {
       success: true,
       qualityScore: distillation.qualityScore,
       code: context.selectionRange ? context.selectionRange.text : context.code,  // Fallback to selection text
@@ -513,7 +513,7 @@ SUCCESS = Valid JSON with complete, comprehensive content (3000+ chars for docum
    * 
    * Strategy: Try to find JSON first. If no JSON found anywhere, treat as raw content.
    */
-  private parseJSON<T>(content: string, fallback: T, phase?: string): T {
+  private async parseJSON<T>(content: string, fallback: T, phase?: string): Promise<T> {
     const debugLabel = phase ? `ODAI-${phase}` : 'ODAI';
     const trimmedContent = content.trim();
     
@@ -555,11 +555,24 @@ SUCCESS = Valid JSON with complete, comprehensive content (3000+ chars for docum
       return autoWrappedResult as T;
     }
     
-    // JSON structure found - try to parse it
+    // JSON structure found - try to parse it with Technician fallback
     const jsonStr = extractJSON(content);
-    const result = safeJSONParse<T>(jsonStr, fallback, debugLabel);
     
-    if (result === fallback && phase === 'Integrate') {
+    // Try parseJSONWithTechnician for intelligent repair
+    let result: T | null = null;
+    try {
+      result = await parseJSONWithTechnician<T>(
+        jsonStr,
+        this.llmProvider,
+        this.config,
+        `ODAI ${phase || 'synthesis'}`,
+        phase === 'Integrate' ? 'SynthesisResult with code, explanation, qualityScore, keyDecisions' : undefined
+      );
+    } catch (error) {
+      console.error(`[${debugLabel}] JSON Technician also failed:`, error);
+    }
+    
+    if (!result && phase === 'Integrate') {
       // JSON parsing failed even though we detected JSON structure
       // This might be malformed JSON with raw content mixed in
       // As a last resort, try to extract just the content
@@ -590,7 +603,7 @@ SUCCESS = Valid JSON with complete, comprehensive content (3000+ chars for docum
       console.warn(`[${debugLabel}] All extraction attempts failed, using fallback`);
     }
     
-    return result;
+    return result || fallback;
   }
 }
 

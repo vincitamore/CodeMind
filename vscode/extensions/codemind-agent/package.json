@@ -67,7 +67,11 @@
         "codemind.primaryProvider": {
           "type": "string",
           "default": "openrouter",
-          "enum": ["openrouter", "anthropic", "local"],
+          "enum": [
+            "openrouter",
+            "anthropic",
+            "local"
+          ],
           "description": "Primary LLM provider"
         },
         "codemind.openrouter.apiKey": {
@@ -87,7 +91,7 @@
         },
         "codemind.qualityThreshold": {
           "type": "number",
-          "default": 9.0,
+          "default": 9,
           "minimum": 0,
           "maximum": 10,
           "description": "Quality threshold for N2 loop"
@@ -110,5 +114,6 @@
     "typescript": "^5.3.0"
   },
   "dependencies": {
+    "marked": "^17.0.1"
   }
 }

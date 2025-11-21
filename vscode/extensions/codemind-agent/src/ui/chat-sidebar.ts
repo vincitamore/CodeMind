@@ -289,7 +289,7 @@ export class ChatSidebarProvider implements vscode.WebviewViewProvider {
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}' https://cdn.jsdelivr.net; img-src ${webview.cspSource} https: data:;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CodeMind Chat</title>
   <style>
@@ -409,9 +409,68 @@ export class ChatSidebarProvider implements vscode.WebviewViewProvider {
       border: 1px solid var(--vscode-panel-border);
       border-radius: 8px;
       padding: 12px;
-      line-height: 1.5;
-      white-space: pre-wrap;
+      line-height: 1.6;
       word-wrap: break-word;
+    }
+
+    /* Markdown rendering */
+    .message-content h1, .message-content h2, .message-content h3 {
+      margin-top: 16px;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .message-content h1 { font-size: 1.5em; border-bottom: 1px solid var(--vscode-panel-border); padding-bottom: 4px; }
+    .message-content h2 { font-size: 1.3em; }
+    .message-content h3 { font-size: 1.1em; }
+
+    .message-content ul, .message-content ol {
+      margin: 8px 0;
+      padding-left: 24px;
+    }
+
+    .message-content li {
+      margin: 4px 0;
+    }
+
+    .message-content code {
+      background-color: var(--vscode-textCodeBlock-background);
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-family: var(--vscode-editor-font-family);
+      font-size: 0.9em;
+    }
+
+    .message-content pre {
+      background-color: var(--vscode-textCodeBlock-background);
+      padding: 12px;
+      border-radius: 4px;
+      overflow-x: auto;
+      margin: 8px 0;
+    }
+
+    .message-content pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .message-content strong {
+      font-weight: 600;
+    }
+
+    .message-content em {
+      font-style: italic;
+    }
+
+    .message-content p {
+      margin: 8px 0;
+    }
+
+    .message-content blockquote {
+      border-left: 3px solid var(--vscode-textBlockQuote-border);
+      background: var(--vscode-textBlockQuote-background);
+      padding: 8px 12px;
+      margin: 8px 0;
     }
 
     .message.user .message-content {
@@ -593,6 +652,9 @@ export class ChatSidebarProvider implements vscode.WebviewViewProvider {
     </div>
   </div>
 
+  <!-- Marked.js for proper markdown rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js" nonce="${nonce}"></script>
+  
   <script nonce="${nonce}">
     const vscode = acquireVsCodeApi();
     const messagesContainer = document.getElementById('messagesContainer');
@@ -602,6 +664,17 @@ export class ChatSidebarProvider implements vscode.WebviewViewProvider {
     const sessionsBtn = document.getElementById('sessionsBtn');
 
     let currentSession = null;
+
+    // Configure marked for security and code highlighting
+    if (typeof marked !== 'undefined') {
+      marked.setOptions({
+        breaks: true,
+        gfm: true,
+        headerIds: false,
+        mangle: false,
+        sanitize: false // We trust our own content
+      });
+    }
 
     // Auto-resize textarea
     messageInput.addEventListener('input', function() {
@@ -691,7 +764,7 @@ export class ChatSidebarProvider implements vscode.WebviewViewProvider {
           <span class="message-role \${message.role}">\${message.role}</span>
           <span class="message-time">\${time}</span>
         </div>
-        <div class="message-content">\${escapeHtml(message.content)}</div>
+        <div class="message-content">\${renderMarkdown(message.content)}</div>
       \`;
 
       if (message.metadata) {
@@ -743,6 +816,130 @@ export class ChatSidebarProvider implements vscode.WebviewViewProvider {
       }
     });
 
+    // Robust markdown renderer
+    function renderMarkdown(text) {
+      // Use marked.js if available (CDN loaded)
+      if (typeof marked !== 'undefined') {
+        try {
+          return marked.parse(text);
+        } catch (error) {
+          console.error('Marked.js parsing error:', error);
+          // Fall through to manual renderer
+        }
+      }
+      
+      // Comprehensive fallback renderer
+      return renderMarkdownFallback(text);
+    }
+
+    // Comprehensive manual markdown renderer (fallback)
+    function renderMarkdownFallback(text) {
+      let html = escapeHtml(text);
+      
+      // Code blocks (must be first to avoid interference)
+      html = html.replace(/\`\`\`([\\w]*)?\\n([\\s\\S]*?)\`\`\`/g, (match, lang, code) => {
+        const language = lang || '';
+        return '<pre><code class="language-' + language + '">' + code.trim() + '</code></pre>';
+      });
+      
+      // Inline code (after code blocks)
+      html = html.replace(/\`([^\`\\n]+)\`/g, '<code>$1</code>');
+      
+      // Headers (must be on their own line)
+      html = html.replace(/^#### (.+)$/gm, '<h4>$1</h4>');
+      html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+      html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+      html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+      
+      // Bold and italic (order matters!)
+      html = html.replace(/\\*\\*\\*([^\\*]+)\\*\\*\\*/g, '<strong><em>$1</em></strong>');
+      html = html.replace(/\\*\\*([^\\*]+)\\*\\*/g, '<strong>$1</strong>');
+      html = html.replace(/\\*([^\\*]+)\\*/g, '<em>$1</em>');
+      html = html.replace(/___([^_]+)___/g, '<strong><em>$1</em></strong>');
+      html = html.replace(/__([^_]+)__/g, '<strong>$1</strong>');
+      html = html.replace(/_([^_]+)_/g, '<em>$1</em>');
+      
+      // Links [text](url)
+      html = html.replace(/\\[([^\\]]+)\\]\\(([^)]+)\\)/g, '<a href="$2" target="_blank">$1</a>');
+      
+      // Images ![alt](url)
+      html = html.replace(/!\\[([^\\]]*)\\]\\(([^)]+)\\)/g, '<img src="$2" alt="$1" />');
+      
+      // Blockquotes
+      html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
+      
+      // Horizontal rules
+      html = html.replace(/^---+$/gm, '<hr>');
+      html = html.replace(/^\\*\\*\\*+$/gm, '<hr>');
+      
+      // Unordered lists
+      const unorderedListRegex = /(^[\\s]*[-*+] .+$\\n?)+/gm;
+      html = html.replace(unorderedListRegex, (match) => {
+        const items = match.trim().split('\\n')
+          .map(line => line.replace(/^[\\s]*[-*+] (.+)$/, '<li>$1</li>'))
+          .join('\\n');
+        return '<ul>\\n' + items + '\\n</ul>\\n';
+      });
+      
+      // Ordered lists
+      const orderedListRegex = /(^[\\s]*\\d+\\. .+$\\n?)+/gm;
+      html = html.replace(orderedListRegex, (match) => {
+        const items = match.trim().split('\\n')
+          .map(line => line.replace(/^[\\s]*\\d+\\. (.+)$/, '<li>$1</li>'))
+          .join('\\n');
+        return '<ol>\\n' + items + '\\n</ol>\\n';
+      });
+      
+      // Line breaks (two spaces at end of line or \\n)
+      html = html.replace(/  \\n/g, '<br>\\n');
+      
+      // Paragraphs - wrap text that isn't already in HTML tags
+      const lines = html.split('\\n');
+      const processed = [];
+      let inBlock = false;
+      let currentParagraph = [];
+      
+      for (let line of lines) {
+        const trimmed = line.trim();
+        
+        // Check if we're in a block element
+        if (trimmed.match(/^<(h[1-6]|pre|ul|ol|blockquote|hr)/)) {
+          // Close any open paragraph
+          if (currentParagraph.length > 0) {
+            processed.push('<p>' + currentParagraph.join(' ') + '</p>');
+            currentParagraph = [];
+          }
+          processed.push(line);
+          inBlock = false;
+        } else if (trimmed.match(/^<\\/(ul|ol|pre|blockquote)>/)) {
+          processed.push(line);
+          inBlock = false;
+        } else if (trimmed.match(/^<(li|code)/)) {
+          processed.push(line);
+          inBlock = true;
+        } else if (trimmed === '') {
+          // Empty line - close paragraph
+          if (currentParagraph.length > 0) {
+            processed.push('<p>' + currentParagraph.join(' ') + '</p>');
+            currentParagraph = [];
+          }
+          inBlock = false;
+        } else if (!inBlock && !trimmed.startsWith('<')) {
+          // Regular text line - add to paragraph
+          currentParagraph.push(trimmed);
+        } else {
+          processed.push(line);
+        }
+      }
+      
+      // Close any remaining paragraph
+      if (currentParagraph.length > 0) {
+        processed.push('<p>' + currentParagraph.join(' ') + '</p>');
+      }
+      
+      return processed.join('\\n');
+    }
+    
     // Escape HTML
     function escapeHtml(text) {
       const div = document.createElement('div');
