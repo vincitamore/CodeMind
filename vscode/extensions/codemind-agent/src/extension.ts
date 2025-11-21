@@ -544,6 +544,11 @@ async function handleOrchestratorRequest(userRequest: string, mentionedFiles: st
     const fileSteps = plan.steps.filter(step => step.operation.type !== 'terminal');
     const terminalSteps = plan.steps.filter(step => step.operation.type === 'terminal');
     
+    console.log(`[Orchestrator] Total steps: ${plan.steps.length}, File steps: ${fileSteps.length}, Terminal steps: ${terminalSteps.length}`);
+    if (terminalSteps.length > 0) {
+      console.log(`[Orchestrator] Terminal steps:`, terminalSteps.map(s => `${s.filePath} (${s.operation.command})`));
+    }
+    
     // Phase 4b: Generate code for file operations
     let generationResults: any[] = [];
     if (fileSteps.length > 0) {
@@ -554,31 +559,62 @@ async function handleOrchestratorRequest(userRequest: string, mentionedFiles: st
       // Create a temporary plan with only file operations
       const filePlan = { ...plan, steps: fileSteps };
       
-      generationResults = await codeGenerator.generateCode(
-        filePlan,
-        userRequest,
-        (event) => {
-          chatSidebarProvider?.updateMessage(planMessageId, {
-            content: planSummary + `\n\n${event.status} (${event.progress}%)`
-          });
-        },
-        true,  // applyImmediately - write files as soon as they're generated!
-        contextFiles  // Pass loaded files for context
-      );
+      try {
+        generationResults = await codeGenerator.generateCode(
+          filePlan,
+          userRequest,
+          (event) => {
+            chatSidebarProvider?.updateMessage(planMessageId, {
+              content: planSummary + `\n\n${event.status} (${event.progress}%)`
+            });
+          },
+          true,  // applyImmediately - write files as soon as they're generated!
+          contextFiles  // Pass loaded files for context
+        );
+        
+        console.log(`[Orchestrator] File generation complete: ${generationResults.length} files generated`);
+      } catch (error) {
+        console.error(`[Orchestrator] File generation failed:`, error);
+        chatSidebarProvider.addMessage({
+          role: 'system',
+          content: `⚠️ File generation encountered errors: ${error instanceof Error ? error.message : 'Unknown error'}\n\nContinuing with terminal operations...`
+        });
+        // Continue to terminal operations even if file generation fails
+      }
     }
     
     // Phase 4c: Execute terminal operations
     if (terminalSteps.length > 0) {
+      console.log(`[Orchestrator] Executing ${terminalSteps.length} terminal operation(s)...`);
+      
       chatSidebarProvider.updateMessage(planMessageId, {
         content: planSummary + '\n\n⚡ Executing terminal commands...'
       });
       
-      for (const step of terminalSteps) {
+      if (!terminalManager || !terminalApprovalPanel) {
+        console.error('[Orchestrator] ❌ Terminal manager or approval panel not initialized!');
+        chatSidebarProvider.addMessage({
+          role: 'system',
+          content: '❌ Terminal execution unavailable. Please reload the extension.'
+        });
+        return; // Critical failure - can't proceed without terminal support
+      }
+      
+      for (let i = 0; i < terminalSteps.length; i++) {
+        const step = terminalSteps[i];
+        console.log(`[Orchestrator] Processing terminal step ${i + 1}/${terminalSteps.length}: ${step.filePath}`);
+        
         const command = step.operation.command || step.operation.content || '';
         if (!command) {
-          console.warn(`[Orchestrator] Terminal step ${step.filePath} has no command`);
+          console.warn(`[Orchestrator] Terminal step ${step.filePath} has no command, skipping`);
+          chatSidebarProvider.addMessage({
+            role: 'system',
+            content: `⚠️ Skipping terminal operation "${step.filePath}" - no command specified`
+          });
           continue;
         }
+        
+        console.log(`[Orchestrator] Command: ${command}`);
         
         chatSidebarProvider.addMessage({
           role: 'system',
@@ -616,12 +652,29 @@ async function handleOrchestratorRequest(userRequest: string, mentionedFiles: st
               const duration = Date.now() - startTime;
               tap.markComplete(result.exitCode || 0, duration);
               
+              // Store terminal output in workspace context for model feedback
+              const terminalOutput = {
+                command,
+                exitCode: result.exitCode || 0,
+                stdout: result.stdout.join('\n'),
+                stderr: result.stderr.join('\n'),
+                duration,
+                timestamp: new Date().toISOString()
+              };
+              
+              // Add to context for future operations to see
+              if (!workspaceContext.terminalResults) {
+                (workspaceContext as any).terminalResults = [];
+              }
+              (workspaceContext as any).terminalResults.push(terminalOutput);
+              
               if (result.exitCode === 0) {
                 chatSidebarProvider.addMessage({
                   role: 'system',
                   content: `✅ Command completed successfully: \`${command}\`\n` +
                            `⏱️ Duration: ${(duration / 1000).toFixed(1)}s`
                 });
+                console.log(`[Orchestrator] ✅ Terminal command succeeded:`, command);
               } else {
                 const errorOutput = result.stderr.length > 0 
                   ? result.stderr.join('\n')
@@ -629,8 +682,12 @@ async function handleOrchestratorRequest(userRequest: string, mentionedFiles: st
                   
                 chatSidebarProvider.addMessage({
                   role: 'system',
-                  content: `❌ Command failed with exit code ${result.exitCode}: \`${command}\`\n\`\`\`\n${errorOutput}\n\`\`\``
+                  content: `❌ Command failed with exit code ${result.exitCode}: \`${command}\`\n\`\`\`\n${errorOutput}\n\`\`\`\n\n💡 The model can see this error and will adjust future operations accordingly.`
                 });
+                console.error(`[Orchestrator] ❌ Terminal command failed (exit ${result.exitCode}):`, command);
+                console.error(`[Orchestrator] stderr:`, result.stderr.join('\n'));
+                
+                // TODO: Implement retry logic - allow the model to see the error and create a new plan
               }
             } else {
               chatSidebarProvider.addMessage({

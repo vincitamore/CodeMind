@@ -103,6 +103,14 @@ export interface WorkspaceContext {
     content: string;
     language: string;
   }>;
+  terminalResults?: Array<{   // Results from terminal commands (for model feedback)
+    command: string;
+    exitCode: number;
+    stdout: string;
+    stderr: string;
+    duration: number;
+    timestamp: string;
+  }>;
 }
 
 /**
