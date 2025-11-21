@@ -403,7 +403,7 @@ async function handleOrchestratorRequest(userRequest: string, context: vscode.Ex
       }
     );
 
-    // Display plan to user
+    // Display plan to user (without filesAffected metadata - no buttons yet!)
     const planSummary = `## Execution Plan\n\n` +
       `**Task Type:** ${plan.taskType}\n` +
       `**Complexity:** ${plan.estimatedComplexity}\n` +
@@ -415,17 +415,13 @@ async function handleOrchestratorRequest(userRequest: string, context: vscode.Ex
 
     const planMessageId = chatSidebarProvider.addMessage({
       role: 'assistant',
-      content: planSummary,
-      metadata: {
-        filesAffected: plan.affectedFiles,
-        operationType: plan.taskType,
-        quality: plan.confidence
-      }
+      content: planSummary
+      // No metadata yet - buttons will appear after code generation
     });
 
     // Phase 4: Generate code for all files
     chatSidebarProvider.updateMessage(planMessageId, {
-      content: planSummary + '\n\n🔧 Generating code...'
+      content: planSummary + '\n\n🔧 Generating code with specialist agents...\n_(This may take several minutes for complex files)_'
     });
 
     const generationResults = await codeGenerator.generateCode(
@@ -446,13 +442,14 @@ async function handleOrchestratorRequest(userRequest: string, context: vscode.Ex
       }
     }
 
-    // Show results
+    // Show results with proper metadata for approval
     const avgQuality = generationResults.reduce((sum, r) => sum + r.quality, 0) / generationResults.length;
     const failedFiles = generationResults.filter(r => !r.converged);
 
-    let resultSummary = planSummary + '\n\n## Generation Complete\n\n';
+    let resultSummary = planSummary + '\n\n## 🎉 Code Generation Complete\n\n';
     resultSummary += `✅ Generated ${generationResults.length} file(s)\n`;
     resultSummary += `📊 Average Quality: ${(avgQuality * 10).toFixed(1)}/10\n`;
+    resultSummary += `⏱️ Total Time: ${Math.round((Date.now() - chatSidebarProvider.getCurrentSession().messages.find(m => m.id === planMessageId)!.timestamp) / 1000)}s\n`;
     
     if (failedFiles.length > 0) {
       resultSummary += `\n⚠️ Failed to generate ${failedFiles.length} file(s):\n`;
@@ -461,7 +458,20 @@ async function handleOrchestratorRequest(userRequest: string, context: vscode.Ex
       });
     }
 
-    resultSummary += `\n**Ready to apply changes?**\nClick "Apply Changes" below to write these files.`;
+    resultSummary += `\n### 📝 Generated Files:\n`;
+    generationResults.filter(r => r.converged).forEach(r => {
+      resultSummary += `- **${r.filePath}** (${(r.quality * 10).toFixed(1)}/10, ${r.iterations} iterations)\n`;
+    });
+
+    resultSummary += `\n**Ready to apply changes?**\n`;
+    resultSummary += `These ${generationResults.filter(r => r.converged).length} files are ready to be written to your workspace.`;
+
+    // Store the plan and results for later use when applying
+    const sessionData = {
+      plan,
+      generationResults,
+      timestamp: Date.now()
+    };
 
     chatSidebarProvider.updateMessage(planMessageId, {
       content: resultSummary,
@@ -469,7 +479,8 @@ async function handleOrchestratorRequest(userRequest: string, context: vscode.Ex
         filesAffected: plan.affectedFiles,
         operationType: plan.taskType,
         quality: avgQuality,
-        rollbackId: undefined // TODO: Create git worktree snapshot
+        rollbackId: undefined, // TODO: Create git worktree snapshot
+        sessionData // Store for apply/reject handlers
       }
     });
 

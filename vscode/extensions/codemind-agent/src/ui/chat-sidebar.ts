@@ -37,6 +37,7 @@ export interface ChatMessage {
     operationType?: string;
     rollbackId?: string;
     quality?: number;
+    sessionData?: any; // Stores plan and generation results for apply/reject
   };
 }
 
@@ -710,9 +711,9 @@ export class ChatSidebarProvider implements vscode.WebviewViewProvider {
       if (message.role === 'assistant' && message.metadata?.filesAffected) {
         html += \`
           <div class="message-actions">
-            <button class="action-button primary" onclick="applyChanges('\${message.id}')">Apply Changes</button>
-            <button class="action-button" onclick="rejectChanges('\${message.id}')">Reject</button>
-            <button class="action-button" onclick="viewDiff('\${message.id}')">View Diff</button>
+            <button class="action-button primary" data-action="apply" data-message-id="\${message.id}">Apply Changes</button>
+            <button class="action-button" data-action="reject" data-message-id="\${message.id}">Reject</button>
+            <button class="action-button" data-action="viewDiff" data-message-id="\${message.id}">View Diff</button>
           </div>
         \`;
       }
@@ -721,22 +722,26 @@ export class ChatSidebarProvider implements vscode.WebviewViewProvider {
       return div;
     }
 
-    // Message handlers
-    window.applyChanges = (messageId) => {
-      vscode.postMessage({ type: 'applyChanges', messageId });
-    };
-
-    window.rejectChanges = (messageId) => {
-      vscode.postMessage({ type: 'rejectChanges', messageId });
-    };
-
-    window.viewDiff = (messageId) => {
-      vscode.postMessage({ type: 'viewDiff', messageId });
-    };
-
-    window.viewFile = (filePath) => {
-      vscode.postMessage({ type: 'viewFile', filePath });
-    };
+    // Message action handlers using event delegation (CSP-compliant)
+    messagesContainer.addEventListener('click', (e) => {
+      const button = e.target;
+      if (button.tagName === 'BUTTON' && button.dataset.action) {
+        const action = button.dataset.action;
+        const messageId = button.dataset.messageId;
+        
+        switch (action) {
+          case 'apply':
+            vscode.postMessage({ type: 'applyChanges', messageId });
+            break;
+          case 'reject':
+            vscode.postMessage({ type: 'rejectChanges', messageId });
+            break;
+          case 'viewDiff':
+            vscode.postMessage({ type: 'viewDiff', messageId });
+            break;
+        }
+      }
+    });
 
     // Escape HTML
     function escapeHtml(text) {
