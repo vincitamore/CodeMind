@@ -17,7 +17,8 @@ import { AnalysisSidebarProvider } from './ui/analysis-sidebar';
 import { ProgressPanelProvider } from './ui/progress-panel';
 import { ChatSidebarProvider } from './ui/chat-sidebar';
 import { classifyTask, TaskType } from './utils/task-classifier';
-import { OrchestratorAgent, ContextManager, FileManager, CodeGenerator } from './orchestrator';
+import { OrchestratorAgent, ContextManager, FileManager, CodeGenerator, TerminalManager } from './orchestrator';
+import { TerminalApprovalPanel } from './ui/terminal-approval-panel';
 
 // Global references
 let analysisSidebarProvider: AnalysisSidebarProvider | undefined;
@@ -26,6 +27,8 @@ let orchestratorAgent: OrchestratorAgent | undefined;
 let contextManager: ContextManager | undefined;
 let fileManager: FileManager | undefined;
 let codeGenerator: CodeGenerator | undefined;
+let terminalManager: TerminalManager | undefined;
+let terminalApprovalPanel: TerminalApprovalPanel | undefined;
 
 /**
  * Create a timeout promise that rejects after specified milliseconds
@@ -99,6 +102,8 @@ export function activate(context: vscode.ExtensionContext) {
   const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '';
   contextManager = new ContextManager(workspaceRoot);
   fileManager = new FileManager();
+  terminalManager = new TerminalManager();
+  terminalApprovalPanel = TerminalApprovalPanel.getInstance();
   
   // Register Analysis Sidebar Provider
   analysisSidebarProvider = new AnalysisSidebarProvider(context.extensionUri);
