@@ -790,6 +790,11 @@ Error Output:
 ${cmd.stderr || cmd.stdout}
 `).join('\n---\n');
 
+    const contextFiles = (workspaceContext.mentionedFiles || []).map(f => `
+File: ${f.path}
+Content preview: ${f.content.substring(0, 500)}...
+`).join('\n');
+
     const analysisPrompt = `You are analyzing why terminal commands failed during a development workflow.
 
 **Original User Request:**
@@ -801,24 +806,73 @@ ${originalPlan.summary}
 **Failed Commands:**
 ${failureSummary}
 
+**Files in Context:**
+${contextFiles || 'No files loaded'}
+
 **Workspace Context:**
 - Root: ${workspaceContext.workspaceRoot}
 - Recent files: ${workspaceContext.recentFiles.slice(0, 5).join(', ')}
 
 **Your Task:**
-1. Analyze why each command failed
+1. Analyze why each command failed (look at stderr/stdout)
 2. Determine if the failures are recoverable
-3. If recoverable, suggest a recovery plan
+3. If recoverable, create a COMPLETE recovery plan
 
-Output YAML with:
-needsRetry: true/false
-analysis: Brief explanation of failures
-recoverySteps:
-  - description: What to do
-    commands:
-      - Terminal commands to run
-    files:
-      - Files to create/modify`;
+**Output YAML Format:**
+needsRetry: boolean (true if recoverable, false if not)
+analysis: string (brief explanation of WHY it failed)
+recoveryPlan:
+  taskType: string (e.g., "bug_fix")
+  summary: string (what the recovery plan will do)
+  steps:
+    - filePath: string (file to modify/create, or terminal operation name)
+      operation:
+        type: string (modify/create/delete/terminal)
+        filePath: string (same as above)
+        content: string (new/modified content for files)
+        command: string (for terminal operations)
+        workingDirectory: string (for terminal - defaults to workspace root)
+        reason: string (why this operation is needed)
+      priority: number (execution order, starting at 1)
+      rationale: string (detailed explanation)
+      risks: list of strings (potential issues)
+  requiredFiles: list of strings (files needed for context)
+  affectedFiles: list of strings (files that will be modified/created)
+  estimatedComplexity: string (low/medium/high)
+  confidence: number (0.0-1.0)
+
+**Example Recovery Plan (package not found):**
+needsRetry: true
+analysis: "Package 'nonexistent-pkg' doesn't exist on npm registry"
+recoveryPlan:
+  taskType: bug_fix
+  summary: Remove invalid package from dependencies
+  steps:
+    - filePath: package.json
+      operation:
+        type: modify
+        filePath: package.json
+        content: (corrected package.json without bad package)
+        reason: Remove nonexistent package
+      priority: 1
+      rationale: Package not found error means it needs to be removed
+      risks: []
+    - filePath: retry-install
+      operation:
+        type: terminal
+        filePath: retry-install
+        command: pnpm install
+        workingDirectory: .
+        reason: Retry installation after fixing dependencies
+      priority: 2
+      rationale: Must reinstall after fixing package.json
+      risks: []
+  requiredFiles:
+    - package.json
+  affectedFiles:
+    - package.json
+  estimatedComplexity: low
+  confidence: 0.95`;
 
     try {
       const response = await this.llmProvider.generate(
@@ -829,7 +883,15 @@ recoverySteps:
       const result = await parseYAMLWithTechnician<{
         needsRetry: boolean;
         analysis: string;
-        recoverySteps?: any[];
+        recoveryPlan?: {
+          taskType: string;
+          summary: string;
+          steps: any[];
+          requiredFiles: string[];
+          affectedFiles: string[];
+          estimatedComplexity: string;
+          confidence: number;
+        };
       }>(
         response.content,
         this.llmProvider,
@@ -839,11 +901,51 @@ recoverySteps:
 
       console.log('[Orchestrator] Terminal failure analysis:', result);
 
+      // Convert to proper ExecutionPlan if recovery plan exists
+      let recoveryPlan: ExecutionPlan | undefined;
+      if (result.needsRetry && result.recoveryPlan) {
+        recoveryPlan = {
+          taskType: this.parseTaskType(result.recoveryPlan.taskType),
+          summary: result.recoveryPlan.summary,
+          steps: result.recoveryPlan.steps.map((step: any, index: number) => ({
+            filePath: step.filePath,
+            operation: {
+              type: step.operation.type,
+              filePath: step.operation.filePath,
+              content: step.operation.content,
+              command: step.operation.command,
+              workingDirectory: step.operation.workingDirectory || workspaceContext.workspaceRoot,
+              reason: step.operation.reason,
+              dependencies: []
+            },
+            priority: step.priority || index + 1,
+            rationale: step.rationale || step.operation.reason,
+            risks: step.risks || [],
+            agentInputs: [{
+              agent: 'orchestrator',
+              contribution: 'Terminal failure recovery'
+            }]
+          })),
+          requiredFiles: result.recoveryPlan.requiredFiles || [],
+          affectedFiles: result.recoveryPlan.affectedFiles || [],
+          estimatedComplexity: (result.recoveryPlan.estimatedComplexity || 'medium') as 'low' | 'medium' | 'high',
+          risks: [],
+          verificationSteps: ['Verify terminal commands execute successfully'],
+          confidence: result.recoveryPlan.confidence || 0.7
+        };
+
+        // Ensure affectedFiles doesn't include terminal operations
+        recoveryPlan.affectedFiles = recoveryPlan.affectedFiles.filter(f => 
+          !recoveryPlan!.steps.find(s => s.filePath === f && s.operation.type === 'terminal')
+        );
+
+        console.log('[Orchestrator] Created recovery plan:', recoveryPlan);
+      }
+
       return {
         needsRetry: result.needsRetry || false,
         analysis: result.analysis || 'Analysis failed',
-        // TODO: Convert recoverySteps into full ExecutionPlan
-        recoveryPlan: undefined
+        recoveryPlan
       };
     } catch (error) {
       console.error('[Orchestrator] Failed to analyze terminal failures:', error);

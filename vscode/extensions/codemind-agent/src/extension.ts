@@ -1137,27 +1137,145 @@ async function handleTerminalRetry(messageId: string) {
     }
 
     // Show analysis results
-    chatSidebarProvider.addMessage({
+    const analysisMessageId = chatSidebarProvider.addMessage({
       role: 'assistant',
       content: `## 🔍 Terminal Failure Analysis\n\n${analysis.analysis}\n\n` +
                (analysis.recoveryPlan ? 
                  `I've created a recovery plan to fix these issues.\n\n` +
-                 `### Recovery Steps:\n${analysis.recoveryPlan.summary}` :
-                 `_Recovery plan generation is still in development. Manual intervention may be required._`)
+                 `### Recovery Plan:\n**${analysis.recoveryPlan.summary}**\n\n` +
+                 `Steps:\n${analysis.recoveryPlan.steps.map((s, i) => `${i + 1}. ${s.operation.type.toUpperCase()}: ${s.filePath} - ${s.rationale}`).join('\n')}` :
+                 `_These failures cannot be automatically recovered. Manual intervention required._`)
     });
-
-    if (analysis.recoveryPlan) {
-      // TODO: Execute the recovery plan
-      // This would recursively call handleOrchestratorRequest with the recovery plan
-      chatSidebarProvider.addMessage({
-        role: 'system',
-        content: '💡 _Automatic recovery plan execution coming soon!_\n\nFor now, please manually apply the suggested fixes.'
-      });
-    }
 
     chatSidebarProvider.updateMessage(messageId, {
       content: message.content + '\n\n✅ Analysis complete. See details below.'
     });
+
+    if (analysis.recoveryPlan) {
+      // Execute the recovery plan immediately
+      chatSidebarProvider.addMessage({
+        role: 'system',
+        content: '🔄 Executing recovery plan...'
+      });
+
+      console.log('[Orchestrator] Executing recovery plan:', analysis.recoveryPlan);
+
+      // Load required files for recovery
+      const recoveryContextFiles = await contextManager!.loadFiles(analysis.recoveryPlan.requiredFiles);
+      
+      // Update workspace context with loaded files
+      if (recoveryContextFiles.length > 0) {
+        workspaceContext.mentionedFiles = [
+          ...(workspaceContext.mentionedFiles || []),
+          ...recoveryContextFiles
+        ];
+      }
+
+      // Clear terminal results for fresh execution
+      (workspaceContext as any).terminalResults = [];
+      (workspaceContext as any).hasTerminalFailures = false;
+
+      // Execute file operations (if any)
+      const recoveryFileSteps = analysis.recoveryPlan.steps.filter(s => s.operation.type !== 'terminal');
+      const recoveryTerminalSteps = analysis.recoveryPlan.steps.filter(s => s.operation.type === 'terminal');
+
+      if (recoveryFileSteps.length > 0) {
+        const recoveryFilePlan = { ...analysis.recoveryPlan, steps: recoveryFileSteps };
+        
+        try {
+          const recoveryResults = await codeGenerator!.generateCode(
+            recoveryFilePlan,
+            `Recovery: ${analysis.analysis}`,
+            (event) => {
+              chatSidebarProvider?.updateMessage(analysisMessageId, {
+                content: chatSidebarProvider.getCurrentSession().messages.find(m => m.id === analysisMessageId)!.content + 
+                         `\n\n${event.status} (${event.progress}%)`
+              });
+            },
+            true, // Apply immediately
+            recoveryContextFiles
+          );
+
+          const successCount = recoveryResults.filter(r => r.converged).length;
+          chatSidebarProvider.addMessage({
+            role: 'system',
+            content: `✅ Recovery file operations complete: ${successCount}/${recoveryResults.length} successful`
+          });
+        } catch (error) {
+          console.error('[Orchestrator] Recovery file generation failed:', error);
+          chatSidebarProvider.addMessage({
+            role: 'system',
+            content: `❌ Recovery file generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+          });
+          return; // Don't proceed to terminal operations if files failed
+        }
+      }
+
+      // Execute terminal operations (if any)
+      if (recoveryTerminalSteps.length > 0 && terminalManager && terminalApprovalPanel) {
+        chatSidebarProvider.addMessage({
+          role: 'system',
+          content: '⚡ Executing recovery terminal commands...'
+        });
+
+        for (let i = 0; i < recoveryTerminalSteps.length; i++) {
+          const step = recoveryTerminalSteps[i];
+          const command = step.operation.command || '';
+          
+          if (!command) {
+            console.warn(`[Orchestrator] Recovery terminal step ${step.filePath} has no command`);
+            continue;
+          }
+
+          const terminalCommand = {
+            command,
+            cwd: step.operation.workingDirectory || workspaceContext.workspaceRoot,
+            reason: `Recovery: ${step.rationale}`,
+            timeout: 600000
+          };
+
+          const approved = await terminalApprovalPanel!.requestApproval(terminalCommand);
+          
+          if (approved) {
+            terminalApprovalPanel!.markRunning();
+            const startTime = Date.now();
+            const result = await terminalManager!.executeCommand(
+              terminalCommand,
+              (type, line) => terminalApprovalPanel!.addOutput(type, line)
+            );
+            
+            const duration = Date.now() - startTime;
+            terminalApprovalPanel!.markComplete(result.exitCode || 0, duration);
+
+            if (result.exitCode === 0) {
+              chatSidebarProvider.addMessage({
+                role: 'system',
+                content: `✅ Recovery command succeeded: \`${command}\``
+              });
+            } else {
+              chatSidebarProvider.addMessage({
+                role: 'system',
+                content: `❌ Recovery command failed: \`${command}\` (exit ${result.exitCode})\n\nThe issue may require manual intervention.`
+              });
+              // Don't retry again to avoid infinite loop
+              return;
+            }
+          } else {
+            chatSidebarProvider.addMessage({
+              role: 'system',
+              content: `⏭️ User declined recovery command: \`${command}\``
+            });
+            return;
+          }
+        }
+
+        chatSidebarProvider.addMessage({
+          role: 'system',
+          content: '🎉 Recovery complete! All operations succeeded.'
+        });
+      }
+    }
+
 
   } catch (error: any) {
     console.error('[Orchestrator] Terminal retry failed:', error);
